@@ -1,0 +1,33 @@
+services:
+  node:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+      args:
+        - TYPE=${TYPE}
+    restart: unless-stopped
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
+    env_file: .env.local
+    volumes:
+      - ./${DB_DATABASE}:/app/${DB_DATABASE}
+
+  node-dev:
+    profiles: !override [development]
+    extends: node
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  node-debug:
+    profiles: !override [debug]
+    extends: node-dev
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.debug
+    ports:
+      - ${DEBUG_PORT}:${DEBUG_PORT}

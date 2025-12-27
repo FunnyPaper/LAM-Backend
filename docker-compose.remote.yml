@@ -1,0 +1,67 @@
+services:
+  node:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+      args:
+        - TYPE=${TYPE}
+    restart: unless-stopped
+    ports:
+      - "${NODE_PORT}:${NODE_PORT}"
+    env_file: .env.remote
+    depends_on:
+      - postgres
+
+  node-dev:
+    profiles: !override [development]
+    extends: node
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+      args:
+        - TYPE=${TYPE}
+    depends_on: !override
+      - postgres-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  node-debug:
+    profiles: !override [debug]
+    extends: node
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.debug
+      args:
+        - TYPE=${TYPE}
+    ports:
+      - ${DEBUG_PORT}:${DEBUG_PORT}
+    depends_on: !override
+      - postgres-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  postgres:
+    profiles: [production]
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+      - PGPORT=${DB_PORT}
+    expose:
+      - ${DB_PORT}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  postgres-dev:
+    profiles: !override [development, debug]
+    extends: postgres
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+
+volumes:
+  postgres_data:
