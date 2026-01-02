@@ -23,7 +23,18 @@ describe(UsersController.name, () => {
       user.refreshToken = await createRefreshToken({ linkRelations: true, overrides: { user }});
       const [controller, usersService] = await createMocks([ user ]);
 
-      await expect(controller.find({ username: user.username, id: user.id, roles: [user.role]}, user.id)).resolves.toEqual(user);
+      await expect(controller.find(user.id)).resolves.toEqual(user);
+      expect(usersService.findById).toHaveBeenCalled();
+    })
+  });
+
+  describe(`::${UsersController.prototype.me.name} should`, () => {
+    it('return user by given id', async () => {
+      const user = await createUser();
+      user.refreshToken = await createRefreshToken({ linkRelations: true, overrides: { user }});
+      const [controller, usersService] = await createMocks([ user ]);
+
+      await expect(controller.me({ user: { username: user.username, id: user.id, roles: [user.role] }})).resolves.toEqual(user);
       expect(usersService.findById).toHaveBeenCalled();
     })
   });

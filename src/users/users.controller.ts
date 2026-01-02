@@ -23,12 +23,27 @@ export class UsersController {
   }
 
   @ApiCreatedResponse({ type: UserDto })
-  @UseGuards(UserOwnershipGuardFactory('id'))
   @UseRoles({ resource: 'users', action: 'read', possession: 'own' })
+  @SerializeOptions({ type: UserDto })
+  @Get('me')
+  me(
+    @Request() req: {       
+      user: { 
+        id: string, 
+        username: string, 
+        roles: Role[] 
+      }  
+    }
+  ): Promise<UserDto> {
+    return this.usersService.findById(req.user.id);
+  }
+
+  @ApiCreatedResponse({ type: UserDto })
+  @UseGuards(UserOwnershipGuardFactory('id'))
+  @UseRoles({ resource: 'users', action: 'read', possession: 'any' })
   @SerializeOptions({ type: UserDto })
   @Get(':id')
   find(
-    @Request() req: { username: string, id: string, roles: Role[] },
     @Param('id') id: string
   ): Promise<UserDto> {
     return this.usersService.findById(id);

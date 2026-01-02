@@ -5,8 +5,8 @@ import { UsersController } from '../../src/users/users.controller';
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { login } from '../utils/auth';
 import { Role } from '../../src/app.roles';
+import { createUser, deleteUser } from '../utils/user';
 import { setupApp } from 'test/utils/setup';
-import { createUser } from 'test/utils/user';
 import { clearDB } from 'test/utils/database';
 import { testTypes } from 'test/utils/testTypes';
 
@@ -33,36 +33,39 @@ describe.each(testTypes())(`${UsersController.name} (e2e) %s`, (type) => {
     expect(app).toBeDefined();
   })
 
-  describe("/users (GET)", () => {
-    it('should return all users if logged as admin', async () => {
-      const username = process.env.INITIAL_ADMIN_USERNAME!;
-      const password = process.env.INITIAL_ADMIN_PASSWORD!;
-
+  describe("/users/me (GET)", () => {
+    const mockRoles = [ Role.ADMIN, Role.USER ];
+    it.each(mockRoles)(`return self (%s)`, async (role) => {
+      const username = `TestUser${mockRoles.indexOf(role)}`;
+      const password = "TestUser123@";
+      
+      const user = await createUser(app, { username, password, role });
       const response = await login(app, { username, password });
+      
       const getResponse = await request(app.getHttpServer())
-        .get('/users')
+        .get(`/users/me`)
         .set("Authorization", `Bearer ${response.body.accessToken}`)
         .send()
         .expect(HttpStatus.OK);
 
       expect(getResponse.body)
-        .toEqual(expect.any(Array))
-      
-      expect(getResponse.body)
-        .toContainEqual(expect.objectContaining({ username, role: Role.ADMIN }));
+        .toMatchObject({ username: user.username, role: user.role })
     })
 
-    it(`should return ${HttpStatus.FORBIDDEN} if logged as user`, async () => {
-      const username = "TestUser";
-      const password = "TestPassword123@";
-      await createUser(app, { username, password, role: Role.USER });
+    it.each(mockRoles)(`return ${HttpStatus.NOT_FOUND} when user was not found (%s)`, async (role) => {
+      const username = `TestUser${mockRoles.indexOf(role)}`;
+      const password = "TestUser123@";
 
+      const user = await createUser(app, { username, password, role });
       const response = await login(app, { username, password });
+      
+      await deleteUser(app, user.id);
+
       await request(app.getHttpServer())
-        .get('/users')
+        .get(`/users/me`)
         .set("Authorization", `Bearer ${response.body.accessToken}`)
         .send()
-        .expect(HttpStatus.FORBIDDEN);
+        .expect(HttpStatus.NOT_FOUND);
     })
   })
 });

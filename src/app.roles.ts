@@ -13,6 +13,12 @@ export default new RolesBuilder([
     action: 'read:any', 
     attributes: '*' 
   },
+  { 
+    role: Role.ADMIN, 
+    resource: 'users', 
+    action: 'read:own', 
+    attributes: '*' 
+  },
   {
     role: Role.ADMIN,
     resource: 'users',

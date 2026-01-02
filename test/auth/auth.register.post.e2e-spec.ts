@@ -32,45 +32,47 @@ describe.each(testTypes())(`${AuthController.name} (e2e) (%s)`, (type) => {
     expect(app).toBeDefined();
   })
 
-  it('/auth/register (POST)', async () => {
-    const username = "UserTest0";
-    const password = "TestPassword1@";
+  describe("/auth/register (POST)", () => {
+    it('should create a new user', async () => {
+      const username = "UserTest0";
+      const password = "TestPassword1@";
 
-    await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ username, password })
-      .expect(HttpStatus.CREATED);
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ username, password })
+        .expect(HttpStatus.CREATED);
 
-    const response = await login(app, { username, password });
+      const response = await login(app, { username, password });
 
-    expect(response.body).toEqual({
-      accessToken: expect.any(String),
-      refreshToken: expect.any(String),
+      expect(response.body).toEqual({
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
+      });
     });
-  });
 
-  it(`should return ${HttpStatus.CONFLICT} if username is taken`, async () => {
-    const username = "UserTest";
-    const password = "TestPassword1@";
+    it(`should return ${HttpStatus.CONFLICT} if username is taken`, async () => {
+      const username = "UserTest";
+      const password = "TestPassword1@";
 
-    await register(app, { username, password })
-      .expect(HttpStatus.CREATED);
-    
-    await register(app, { username, password })
-      .expect(HttpStatus.CONFLICT);
-  });
+      await register(app, { username, password })
+        .expect(HttpStatus.CREATED);
+      
+      await register(app, { username, password })
+        .expect(HttpStatus.CONFLICT);
+    });
 
-  it.each([
-    ["Username", "Us1@"], // min-length  
-    ["Username", "User1@" + faker.string.alphanumeric({ length: 123 })], // max-length  
-    ["Username", "User11"],  // symbols
-    ["Username", "user1@"],  // uppercase
-    ["Username", "User@@"],  // numbers
-    ["Username", "USER1@"],  // lowercase
-    ["User", "User1@"],  // min-length
-    ["Username" + faker.string.alphanumeric({ length: 25 }), "User1@"],  // max-length
-  ])(`should return ${HttpStatus.BAD_REQUEST} with invalid credentials (%s - %s)`, async (username, password) => {
-    await register(app, { username, password })
-      .expect(HttpStatus.BAD_REQUEST);
+    it.each([
+      ["Username", "Us1@"], // min-length  
+      ["Username", "User1@" + faker.string.alphanumeric({ length: 123 })], // max-length  
+      ["Username", "User11"],  // symbols
+      ["Username", "user1@"],  // uppercase
+      ["Username", "User@@"],  // numbers
+      ["Username", "USER1@"],  // lowercase
+      ["User", "User1@"],  // min-length
+      ["Username" + faker.string.alphanumeric({ length: 25 }), "User1@"],  // max-length
+    ])(`should return ${HttpStatus.BAD_REQUEST} with invalid credentials (%s - %s)`, async (username, password) => {
+      await register(app, { username, password })
+        .expect(HttpStatus.BAD_REQUEST);
+    })
   })
 });

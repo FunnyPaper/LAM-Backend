@@ -32,41 +32,43 @@ describe.each(testTypes())(`${UsersController.name} (e2e) %s`, (type) => {
     expect(app).toBeDefined();
   })
 
-  it.each([
-    Role.USER, Role.ADMIN
-  ])('should create user with role %s if logged as admin', async (role) => {
-    const username = process.env.INITIAL_ADMIN_USERNAME!;
-    const password = process.env.INITIAL_ADMIN_PASSWORD!;
-    const response = await login(app, { username, password });
-    const newUsername = "TestUser0";
-    const newPassword = "TestPassword123@";
-    const postResponse = await request(app.getHttpServer())
-      .post('/users')
-      .set("Authorization", `Bearer ${response.body.accessToken}`)
-      .send({ username: newUsername, password: newPassword, role })
-      .expect(HttpStatus.CREATED);
+  describe("/users (POST)", () => {
+    it.each([
+      Role.USER, Role.ADMIN
+    ])('should create user with role %s if logged as admin', async (role) => {
+      const username = process.env.INITIAL_ADMIN_USERNAME!;
+      const password = process.env.INITIAL_ADMIN_PASSWORD!;
+      const response = await login(app, { username, password });
+      const newUsername = "TestUser0";
+      const newPassword = "TestPassword123@";
+      const postResponse = await request(app.getHttpServer())
+        .post('/users')
+        .set("Authorization", `Bearer ${response.body.accessToken}`)
+        .send({ username: newUsername, password: newPassword, role })
+        .expect(HttpStatus.CREATED);
 
-    expect(postResponse.body).toMatchObject({
-      username: newUsername,
-      role,
-    });
-  })
+      expect(postResponse.body).toMatchObject({
+        username: newUsername,
+        role,
+      });
+    })
 
-  it.each([
-    Role.USER, Role.ADMIN
-  ])(`should return ${HttpStatus.FORBIDDEN} if logged as user`, async (role) => {
-    const username = "TestUser1";
-    const password = "TestPassword1@";
+    it.each([
+      Role.USER, Role.ADMIN
+    ])(`should return ${HttpStatus.FORBIDDEN} if logged as user`, async (role) => {
+      const username = "TestUser1";
+      const password = "TestPassword1@";
 
-    const userResponse = await registerAndLogin(app, { 
-      username,
-      password
-    });
+      const userResponse = await registerAndLogin(app, { 
+        username,
+        password
+      });
 
-    await request(app.getHttpServer())
-      .post('/users')
-      .set("Authorization", `Bearer ${userResponse.body.accessToken}`)
-      .send({ username, password, role })
-      .expect(HttpStatus.FORBIDDEN);
+      await request(app.getHttpServer())
+        .post('/users')
+        .set("Authorization", `Bearer ${userResponse.body.accessToken}`)
+        .send({ username, password, role })
+        .expect(HttpStatus.FORBIDDEN);
+    })
   })
 });

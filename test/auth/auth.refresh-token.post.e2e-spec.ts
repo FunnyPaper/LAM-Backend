@@ -31,26 +31,28 @@ describe.each(testTypes())(`${AuthController.name} (e2e) (%s)`, (type) => {
     expect(app).toBeDefined();
   })
 
-  it('/auth/refresh-token (POST)', async () => {
-    const username = process.env.INITIAL_ADMIN_USERNAME!;
-    const password = process.env.INITIAL_ADMIN_PASSWORD!;
+  describe("/auth/refresh-token (POST)", () => {
+    it('should generate a new token pair', async () => {
+      const username = process.env.INITIAL_ADMIN_USERNAME!;
+      const password = process.env.INITIAL_ADMIN_PASSWORD!;
 
-    await request(app.getHttpServer())
-      .post('/auth/refresh-token')
-      .send()
-      .expect(HttpStatus.UNAUTHORIZED);
+      await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .send()
+        .expect(HttpStatus.UNAUTHORIZED);
 
-    const loginResponse = await login(app, { username, password });
+      const loginResponse = await login(app, { username, password });
 
-    const refreshResponse = await request(app.getHttpServer())
-      .post('/auth/refresh-token')
-      .set("Authorization", `Bearer ${loginResponse.body.refreshToken}`)
-      .send()
-      .expect(HttpStatus.CREATED);
+      const refreshResponse = await request(app.getHttpServer())
+        .post('/auth/refresh-token')
+        .set("Authorization", `Bearer ${loginResponse.body.refreshToken}`)
+        .send()
+        .expect(HttpStatus.CREATED);
 
-    expect(refreshResponse.body).toEqual({
-      accessToken: expect.any(String),
-      refreshToken: expect.any(String),
+      expect(refreshResponse.body).toEqual({
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
+      });
     });
-  });
+  })
 });

@@ -31,23 +31,25 @@ describe.each(testTypes())(`${AuthController.name} (e2e) (%s)`, (type) => {
     expect(app).toBeDefined();
   })
 
-  it('/auth/logout (POST)', async () => {
-    const username = process.env.INITIAL_ADMIN_USERNAME!;
-    const password = process.env.INITIAL_ADMIN_PASSWORD!;
+  describe("/auth/logout (POST)", () => {
+    it('should revoke token', async () => {
+      const username = process.env.INITIAL_ADMIN_USERNAME!;
+      const password = process.env.INITIAL_ADMIN_PASSWORD!;
 
-    await request(app.getHttpServer())
-      .post('/auth/logout')
-      .send()
-      .expect(HttpStatus.UNAUTHORIZED);
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .send()
+        .expect(HttpStatus.UNAUTHORIZED);
 
-    const response = await login(app, { username, password });
+      const response = await login(app, { username, password });
 
-    const res = await request(app.getHttpServer())
-      .post('/auth/logout')
-      .set("Authorization", `Bearer ${response.body.accessToken}`)
-      .send()
-      .expect(HttpStatus.CREATED);
-      
-    expect(res.body).toMatchObject({ message: 'Token revoked' });
-  });
+      const res = await request(app.getHttpServer())
+        .post('/auth/logout')
+        .set("Authorization", `Bearer ${response.body.accessToken}`)
+        .send()
+        .expect(HttpStatus.CREATED);
+        
+      expect(res.body).toMatchObject({ message: 'Token revoked' });
+    });
+  })
 });
