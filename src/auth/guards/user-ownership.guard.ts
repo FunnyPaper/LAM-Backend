@@ -1,15 +1,20 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Role } from '../../app.roles';
 
-@Injectable()
-export class UserOwnershipGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest();
+export function UserOwnershipGuardFactory(idFieldName: string = 'id') {
+  @Injectable()
+  class UserOwnershipGuard implements CanActivate {
+    canActivate(context: ExecutionContext): boolean {
+      const req = context.switchToHttp().getRequest();
+      if (!req.user) return false;
 
-    const role = req.user.roles[0];
-    const id = req.user.id;
-    const paramId = req.params.id;
+      const isAdmin = req.user.roles.includes(Role.ADMIN);
+      const id = req.user.id;
+      const paramId = req.params[idFieldName];
 
-    return role == Role.ADMIN || id === paramId;
+      return isAdmin || String(id) === String(paramId);
+    }
   }
+
+  return UserOwnershipGuard;
 }

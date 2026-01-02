@@ -3,7 +3,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AuthController } from '../../src/auth/auth.controller';
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { setupApp } from '../utils/setup-app';
+import { setupApp } from '../utils/setup';
 import { clearDB } from 'test/utils/database';
 import { testTypes } from 'test/utils/testTypes';
 
@@ -16,12 +16,18 @@ describe.each(testTypes())(`${AuthController.name} (e2e) (%s)`, (type) => {
   }, 60000);
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
     await container?.stop();
   });
 
   afterEach(async () => {
-    await clearDB(app, type);
+    if(app) {
+      await clearDB(app, type);
+    }
+  })
+
+  beforeEach(() => {
+    expect(app).toBeDefined();
   })
 
   describe('/auth/login (POST)', () => {

@@ -7,6 +7,8 @@ import { AccessControlModule } from 'nest-access-control';
 import appRoles from './app.roles';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SharedModule } from './shared/shared.module';
+import { ScriptsModule } from './scripts/scripts.module';
+import { EnvModule } from './env/env.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { SharedModule } from './shared/shared.module';
     AuthModule,
     UsersModule, 
     DatabaseModule, 
-    ConfigurationModule,
+    ConfigurationModule, 
+    ScriptsModule, 
+    EnvModule,
   ],
 })
 export class AppModule {}

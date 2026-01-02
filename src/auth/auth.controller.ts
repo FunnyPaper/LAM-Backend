@@ -51,7 +51,6 @@ export class AuthController {
 
   @SerializeOptions({ type: UserDto })
   @Post('register')
-  @UseRoles({ resource: 'auth', action: 'create', possession: 'any' })
   register(
     @Body() body: RegisterDto
   ) {

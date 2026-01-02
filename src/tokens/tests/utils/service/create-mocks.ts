@@ -3,7 +3,7 @@ import { getRepositoryToken } from "@nestjs/typeorm";
 import { RefreshTokenEntity } from "src/tokens/entities/refresh-token.entity";
 import { RefreshTokenService } from "src/tokens/refresh-token.service";
 import { FakeRefreshToken } from "test/utils/entities/refresh-token";
-import { createRefreshTokenRepositoryMock } from "test/utils/mocks/refresh-token-repository.mock";
+import { createRefreshTokenRepositoryMock } from "test/utils/mocks/refresh-token.repository.mock";
 
 export async function createMocks(tokens: FakeRefreshToken[]) {
   const refreshTokenRepoMock = createRefreshTokenRepositoryMock(tokens);

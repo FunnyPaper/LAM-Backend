@@ -6,7 +6,7 @@ import { ApiBearerAuth, ApiCreatedResponse } from '@nestjs/swagger';
 import { UserDto } from './dtos/user.dto';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { Role } from '../app.roles';
-import { UserOwnershipGuard } from 'src/auth/guards/user-ownership.guard';
+import { UserOwnershipGuardFactory } from 'src/auth/guards/user-ownership.guard';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, ACGuard)
@@ -23,7 +23,7 @@ export class UsersController {
   }
 
   @ApiCreatedResponse({ type: UserDto })
-  @UseGuards(UserOwnershipGuard)
+  @UseGuards(UserOwnershipGuardFactory('id'))
   @UseRoles({ resource: 'users', action: 'read', possession: 'own' })
   @SerializeOptions({ type: UserDto })
   @Get(':id')

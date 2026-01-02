@@ -5,7 +5,7 @@ import { UsersController } from '../../src/users/users.controller';
 import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { login, registerAndLogin } from '../utils/auth';
 import { Role } from '../../src/app.roles';
-import { setupApp } from 'test/utils/setup-app';
+import { setupApp } from 'test/utils/setup';
 import { clearDB } from 'test/utils/database';
 import { testTypes } from 'test/utils/testTypes';
 
@@ -18,12 +18,18 @@ describe.each(testTypes())(`${UsersController.name} (e2e) %s`, (type) => {
   }, 60000);
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
     await container?.stop();
-  })
-  
+  });
+
   afterEach(async () => {
-    await clearDB(app, type);
+    if(app) {
+      await clearDB(app, type);
+    }
+  })
+
+  beforeEach(() => {
+    expect(app).toBeDefined();
   })
 
   it.each([

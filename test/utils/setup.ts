@@ -1,4 +1,4 @@
-import { ValidationPipe } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { Test } from "@nestjs/testing";
@@ -7,8 +7,8 @@ import { AppModule } from "src/app.module";
 import { DatabaseModule } from "src/database/database.module";
 import { DomainErrorFilter } from "src/shared/filters/domain-error.filter";
 import { GlobalClassSerializerInterceptor } from "src/shared/interceptors/global-class-serializer.interceptor";
-import { HashService } from "src/shared/providers/hash.service";
-import { initDB } from "test/utils/database";
+import { App } from "supertest/types";
+import { clearDB, initDB } from "test/utils/database";
 import { TestDatabaseModule } from "test/utils/modules/test-database.module";
 
 export async function setupApp(type: "local" | "remote") {
@@ -22,8 +22,7 @@ export async function setupApp(type: "local" | "remote") {
         envFilePath: '.env.test',
         isGlobal: true,
       })
-    ],
-    providers: [HashService]
+    ]
   })
   .overrideModule(DatabaseModule)
   .useModule(dbModule)
@@ -45,4 +44,25 @@ export async function setupApp(type: "local" | "remote") {
   }
 
   return [app, container] as const;
+}
+
+export function setupHooks(
+  type: 'local' | 'remote', 
+  app: INestApplication<App>, 
+  container: StartedPostgreSqlContainer | null
+) {
+  afterAll(async () => {
+    await app?.close();
+    await container?.stop();
+  });
+
+  afterEach(async () => {
+    if(app) {
+      await clearDB(app, type);
+    }
+  })
+
+  beforeEach(() => {
+    expect(app).toBeDefined();
+  })
 }

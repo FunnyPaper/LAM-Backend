@@ -6,7 +6,7 @@ import { UserEntity } from "src/users/entities/user.entity";
 import { UsersService } from "src/users/users.service";
 import { FakeUser } from "test/utils/entities/user";
 import { createRefreshTokenServiceMock } from "test/utils/mocks/refresh-token.service.mock";
-import { createUsersRepossitoryMock } from "test/utils/mocks/users-repository.mock";
+import { createUsersRepossitoryMock } from "test/utils/mocks/users.repository.mock";
 
 export async function createMocks(users: FakeUser[]) {
   const refreshTokenServiceMock = createRefreshTokenServiceMock();

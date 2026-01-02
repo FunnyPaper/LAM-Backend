@@ -26,28 +26,65 @@ export default new RolesBuilder([
     attributes: '*'
   },
   // auth
-  { 
-    role: Role.ADMIN, 
-    resource: 'auth', 
-    action: 'create:any', 
-    attributes: '*' 
-  },
   {
     role: Role.ADMIN,
-    resource: 'users',
+    resource: 'auth',
     action: 'create:own',
     attributes: '*'
   },
-  { 
-    role: Role.USER, 
-    resource: 'auth', 
-    action: 'create:any', 
-    attributes: '*' 
+  {
+    role: Role.USER,
+    resource: 'auth',
+    action: 'create:own',
+    attributes: '*'
+  },
+  // env
+  {
+    role: Role.ADMIN,
+    resource: 'env',
+    action: 'create:own',
+    attributes: '*'
+  },
+  {
+    role: Role.ADMIN,
+    resource: 'env',
+    action: 'read:own',
+    attributes: '*'
+  },
+  {
+    role: Role.ADMIN,
+    resource: 'env',
+    action: 'update:own',
+    attributes: '*'
+  },
+  {
+    role: Role.ADMIN,
+    resource: 'env',
+    action: 'delete:own',
+    attributes: '*'
   },
   {
     role: Role.USER,
-    resource: 'users',
+    resource: 'env',
     action: 'create:own',
+    attributes: '*'
+  },
+  {
+    role: Role.USER,
+    resource: 'env',
+    action: 'read:own',
+    attributes: '*'
+  },
+  {
+    role: Role.USER,
+    resource: 'env',
+    action: 'update:own',
+    attributes: '*'
+  },
+  {
+    role: Role.USER,
+    resource: 'env',
+    action: 'delete:own',
     attributes: '*'
   },
 ]);

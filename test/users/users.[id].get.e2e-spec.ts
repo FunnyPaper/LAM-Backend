@@ -6,7 +6,7 @@ import { StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { login } from '../utils/auth';
 import { Role } from '../../src/app.roles';
 import { createUser, deleteUser, getIdByUsername } from '../utils/user';
-import { setupApp } from 'test/utils/setup-app';
+import { setupApp } from 'test/utils/setup';
 import { faker } from '@faker-js/faker';
 import { clearDB } from 'test/utils/database';
 import { testTypes } from 'test/utils/testTypes';
@@ -20,12 +20,18 @@ describe.each(testTypes())(`${UsersController.name} (e2e) %s`, (type) => {
   }, 60000);
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
     await container?.stop();
-  })
+  });
 
   afterEach(async () => {
-    await clearDB(app, type);
+    if(app) {
+      await clearDB(app, type);
+    }
+  })
+
+  beforeEach(() => {
+    expect(app).toBeDefined();
   })
 
   it('return user by given id', async () => {

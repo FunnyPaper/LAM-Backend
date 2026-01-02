@@ -8,7 +8,8 @@ const map: Record<DomainErrorCode, HttpStatus> = {
   TOKEN_EXPIRED: HttpStatus.UNAUTHORIZED,
   TOKEN_REVOKED: HttpStatus.UNAUTHORIZED,
   USER_NOT_FOUND: HttpStatus.NOT_FOUND,
-  USERNAME_TAKEN: HttpStatus.CONFLICT
+  USERNAME_TAKEN: HttpStatus.CONFLICT,
+  ENV_NOT_FOUND: HttpStatus.NOT_FOUND
 }
 
 export function mapDomainErrorStatus(code: string) {

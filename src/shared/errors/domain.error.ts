@@ -15,7 +15,8 @@ export const DomainErrorCodes = {
   tokenExpired: "TOKEN_EXPIRED",
   tokenRevoked: "TOKEN_REVOKED",
   userNotFound: "USER_NOT_FOUND",
-  usernameTaken: "USERNAME_TAKEN"
+  usernameTaken: "USERNAME_TAKEN",
+  envNotFound: "ENV_NOT_FOUND"
 } as const;
 
 export type DomainErrorCode = typeof DomainErrorCodes[keyof typeof DomainErrorCodes];
