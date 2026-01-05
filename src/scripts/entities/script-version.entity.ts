@@ -16,7 +16,9 @@ export class ScriptVersionEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => ScriptEntity, (script) => script.versions)
+  @ManyToOne(() => ScriptEntity, (script) => script.versions, {
+    onDelete: 'CASCADE'
+  })
   script: ScriptEntity;
 
   @OneToOne(() => ScriptContentEntity, (content) => content.scriptVersion, {

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, Length } from "class-validator";
+import { IsJSON, IsOptional, Length } from "class-validator";
 
 export class CreateEnvDto {
   @ApiProperty()

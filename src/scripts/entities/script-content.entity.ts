@@ -19,7 +19,7 @@ export class ScriptContentEntity {
   scriptVersion: ScriptVersionEntity;
 
   @Column({ type: jsonType, nullable: true })
-  astJson: Record<string, any> | null;
+  astJson?: Record<string, any>;
 
   @Column()
   astVersion: number;

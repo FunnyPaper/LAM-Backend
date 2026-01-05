@@ -15,9 +15,11 @@ export class ScriptEntity {
   name: string;
 
   @Column({ nullable: true })
-  description: string;
+  description?: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.scripts)
+  @ManyToOne(() => UserEntity, (user) => user.scripts, {
+    onDelete: 'CASCADE'
+  })
   owner: UserEntity;
 
   @OneToMany(() => ScriptVersionEntity, (version) => version.script)

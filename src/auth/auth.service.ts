@@ -113,4 +113,27 @@ export class AuthService {
   public async logout(userId: string) {
     await this.usersService.clearRefreshToken(userId);
   }
+
+  public async verify(token: string) {
+    const payload = this.jwtService.verify(token, {
+      secret: process.env.JWT_ACCESS_SECRET
+    });
+    return this.usersService.findById(payload.sub as string);
+  }
+
+  public createGrpcToken(runId: string, userId: string) {
+    return this.jwtService.sign(
+      {
+        iss: 'api-service',
+        sub: 'script-run',
+        runId,
+        userId,
+        scope: ['run:start', 'run:cancel'],
+      },
+      {
+        secret: process.env.GRPC_ACCEC_TOKEN_SECRET, 
+        expiresIn: '2m' 
+      },
+    );
+  }
 }

@@ -27,14 +27,14 @@ export class EnvService {
   }
 
   public async update(userId: string, envId: string, dto: UpdateEnvDto): Promise<EnvEntity> {
-    await this.usersService.findById(userId);
+    const env = await this.findById(userId, envId);
 
-    const env = await this.envRepo.save({
-      id: envId,
+    const result = await this.envRepo.save({
+      ...env,
       ...dto
     });
 
-    return env;
+    return result;
   }
 
   public tryFindAll(userId: string): Promise<EnvEntity[]> {
@@ -47,8 +47,8 @@ export class EnvService {
     });
   }
 
-  public async findById(userId: string, envId: string): Promise<EnvEntity> {
-    const env = await this.envRepo.findOne({
+  public tryFindById(userId: string, envId: string): Promise<EnvEntity | null> {
+    return this.envRepo.findOne({
       where: {
         id: envId,
         owner: {
@@ -56,6 +56,10 @@ export class EnvService {
         }
       },
     });
+  }
+
+  public async findById(userId: string, envId: string): Promise<EnvEntity> {
+    const env = await this.tryFindById(userId, envId);
 
     if (!env) {
       throw new EnvNotFoundError(userId, envId);

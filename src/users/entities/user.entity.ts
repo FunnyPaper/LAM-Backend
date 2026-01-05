@@ -6,6 +6,7 @@ import { Type } from "class-transformer";
 import { ScriptEntity } from "src/scripts/entities/script.entity";
 import { EnvEntity } from "../../env/entities/env.entity";
 import { columnEnumType } from "src/shared/decorators/column-enum-type";
+import { ScriptRunEntity } from "src/scripts/entities/script-run.entity";
 
 const dateOptions = columnDateOptions(process.env.DB_TYPE!);
 const enumType = columnEnumType(process.env.DB_TYPE!);
@@ -39,6 +40,9 @@ export class UserEntity {
     cascade: true
   })
   envs: EnvEntity[];
+
+  @OneToMany(() => ScriptRunEntity, (scriptRun) => scriptRun.createdBy)
+  scriptRuns: ScriptRunEntity[]
 
   @CreateDateColumn(dateOptions)
   @Type(() => Date)

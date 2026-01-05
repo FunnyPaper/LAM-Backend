@@ -16,10 +16,10 @@ export class ScriptRunResultEntity {
     onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'scriptRunId' })
-  scriptVersion: ScriptRunEntity;
+  scriptRun: ScriptRunEntity;
 
   @Column({ type: jsonType, nullable: true })
-  data: Record<string, any> | null;;
+  data?: Record<string, any>;
 
   @CreateDateColumn(dateOptions)
   @Type(() => Date)
