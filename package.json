@@ -1,10 +1,15 @@
 {
-    "name": "lam-backend",
+    "name": "@lam/backend",
     "version": "0.4.0",
     "description": "",
     "author": "",
     "private": true,
     "license": "UNLICENSED",
+    "main": "./dist/src/main.js",
+    "files": [
+        "README.md",
+        "LICENSE"
+    ],
     "scripts": {
         "build": "nest build",
         "build:cli": "nest build && chmod +x ./dist/src/main-cli.js && npm link --force",
@@ -12,7 +17,7 @@
         "start": "nest start",
         "start:dev": "nest start --watch",
         "start:debug": "nest start -p tsconfig.debug.json --watch --debug",
-        "start:prod": "node dist/main",
+        "start:prod": "node dist/src/main",
         "gen:proto": "npx buf generate",
         "docker": "npm run docker:down:all && docker compose -f $CFILE --env-file $EFILE --profile $DPROFILE build && docker compose -f $CFILE --env-file $EFILE --profile $DPROFILE up -d",
         "docker:down": "docker compose -f $DCFILE --env-file $DEFILE --profile \"*\" down --remove-orphans",
