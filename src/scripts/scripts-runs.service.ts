@@ -21,15 +21,11 @@ import { ScriptVersionEntity } from './entities/script-version.entity';
 import { ScriptEntity } from './entities/script.entity';
 import { Require } from 'src/shared/types/require';
 import { PaginatedScriptRunDto } from './dto/paginated-script-run.dto';
-import { ScriptRunGateway } from './gateways/script-run.gateway';
-import { ScriptsRunsGrpcClientService } from './scripts-runs-grpc-client.service';
-import { firstValueFrom } from 'rxjs';
 import { ScriptRunResultEntity } from './entities/script-run-result.entity';
 import { ScriptVersionStatusEnum } from './enums/script-version-status.enum';
 import { ScriptRunCreateFromUnpublishedError } from './errors/script-run-create-from-unpublished.error';
 import { AuthService } from 'src/auth/auth.service';
-import { JobEventType } from 'src/proto/worker';
-import { RunEvent } from './gateways/run.event';
+import { ScriptsRunsProcessor } from './processors/scripts-runs.processor';
 
 @Injectable()
 export class ScriptsRunsService {
@@ -41,9 +37,8 @@ export class ScriptsRunsService {
     private readonly scriptsVersionsService: ScriptsVersionsService,
     private readonly usersService: UsersService,
     private readonly envService: EnvService,
-    private readonly gateway: ScriptRunGateway,
-    private readonly grpcClientService: ScriptsRunsGrpcClientService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly scriptRunsProcessor: ScriptsRunsProcessor
   ) {}
 
   public async create(userId: string, dto: CreateScriptRunDto): Promise<ScriptRunEntity> {
@@ -71,66 +66,13 @@ export class ScriptsRunsService {
     });
 
     const run = await this.scriptsRunsRepo.save(scriptRun);
-    
-    const token = this.authService.createGrpcToken(run.id, userId);
-    const stream = this.grpcClientService.startJob(run.id, token);
 
-    stream.subscribe({
-      next: (event) => {
-        const runId = run.id;
-        switch(event.type) {
-          case JobEventType.STATUS_CHANGE: {
-            const status = event.status!
-            // Recast status
-            this.gateway.emitRunEvent(runId, { 
-              type: 'status',
-              status: status as unknown as ScriptRunStatusEnum
-            });     
-            break;
-          }       
-          case JobEventType.RESULT_UPDATE: {
-            const run = this.scriptsRunsRepo.findOne({ where: { id: runId }, relations: { result: true }});
-
-            void run.then(r => {
-              const result = this.scriptsRunsResultsRepo.create(r!.result!);
-
-              result.data = {
-                ...r?.result?.data,
-                ...event.payload
-              }
-
-              void this.scriptsRunsResultsRepo.save(result);
-
-              this.gateway.emitRunEvent(runId, {
-                type: 'progress',
-                progress: 0
-              });
-            });
-
-            break;
-          }
-          case JobEventType.LOG:
-            this.gateway.emitRunEvent(runId, {
-              type: 'log',
-              message: event.log!.message,
-              ts: event.log!.type
-            })
-            break;
-        }
-      },
-      error: (err) => {
-        this.gateway.emitRunEvent(run.id, {
-          type: 'status',
-          status: ScriptRunStatusEnum.Failed
-        });
-      },
-      complete: () => {
-        this.gateway.emitRunEvent(run.id, {
-          type: 'status',
-          status: ScriptRunStatusEnum.Succeeded
-        });
-      }
-    })
+    void this.scriptRunsProcessor.enqueueStartJob(
+        run.id,
+        userId,
+        scriptVersion.content.astJson!,
+        env?.data
+    );
 
     return run;
   }
@@ -210,12 +152,7 @@ export class ScriptsRunsService {
     }
 
     const token = this.authService.createGrpcToken(run.id, userId);
-    await firstValueFrom(this.grpcClientService.cancelJob(run.id, token));
-
-    this.gateway.emitRunEvent(run.id, {
-      type: 'status',
-      status: ScriptRunStatusEnum.Cancelled
-    });
+    await this.scriptRunsProcessor.cancelJob(run.id, token);
 
     return this.scriptsRunsRepo.save({
       ...run,
@@ -280,6 +217,11 @@ export class ScriptsRunsService {
 
     if(scriptVersionId) {
       filters.scriptVersion ??= {};
+      (<FindOptionsWhere<ScriptEntity>>
+        (<FindOptionsWhere<ScriptVersionEntity>>
+          filters.scriptVersion
+        ).script) ??= {};
+
       (<FindOptionsWhere<ScriptEntity>>
         (<FindOptionsWhere<ScriptVersionEntity>>
           filters.scriptVersion

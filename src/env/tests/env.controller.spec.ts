@@ -34,7 +34,7 @@ describe(EnvController.name, () => {
       user.envs = [ env ];
       const [controller] = await createMocks([ user ]);
 
-      await expect(controller.findAll(user.id))
+      await expect(controller.findAll(user.id, {}))
         .resolves
         .toMatchObject([ env ])
     });

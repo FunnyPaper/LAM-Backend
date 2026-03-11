@@ -25,10 +25,10 @@ export class EnvEntity {
   name: string;
 
   @Column({ type: 'varchar', nullable: true })
-  description: string | null;
+  description?: string;
 
   @Column({ type: jsonType, nullable: true })
-  data: Record<string, any> | null;
+  data?: Record<string, any>;
 
   @CreateDateColumn(dateOptions)
   @Type(() => Date)

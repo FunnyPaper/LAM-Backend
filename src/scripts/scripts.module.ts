@@ -20,6 +20,7 @@ import { WORKER_PACKAGE_NAME, WORKER_SERVICE_NAME } from 'src/proto/worker';
 import { join } from 'path';
 import { ScriptsRunsGrpcClientService } from './scripts-runs-grpc-client.service';
 import { AuthModule } from 'src/auth/auth.module';
+import { ScriptsRunsProcessor } from './processors/scripts-runs.processor';
 
 @Module({
   imports: [
@@ -56,7 +57,8 @@ import { AuthModule } from 'src/auth/auth.module';
     ScriptsRunsService,
     ScriptsVersionsService,
     ScriptRunGateway,
-    ScriptsRunsGrpcClientService
+    ScriptsRunsGrpcClientService,
+    ScriptsRunsProcessor
   ],
 })
 export class ScriptsModule {}

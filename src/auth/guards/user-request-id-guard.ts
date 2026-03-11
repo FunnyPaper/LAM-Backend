@@ -9,21 +9,19 @@ export class UserRequestIdGuard implements CanActivate {
     const user = req.user;
 
     if (!user) {
-      throw new UnauthorizedException();
+        throw new UnauthorizedException();
     }
 
     const queryUserId = req.query.userId;
 
     if (!user.roles.includes(Role.ADMIN)) {
-      req.requestUserId = user.id;
-    } else if(queryUserId) {
-      if(queryUserId == 'me') {
         req.requestUserId = user.id;
-      } else if(!isUUID(queryUserId)) {
+    } else if(!queryUserId || queryUserId == 'me') {
+        req.requestUserId = user.id;
+    } else if(!isUUID(queryUserId)) {
         throw new UnprocessableEntityException();
-      } else {
+    } else {
         req.requestUserId = queryUserId;
-      }
     }
 
     return true;

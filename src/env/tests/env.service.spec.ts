@@ -35,7 +35,7 @@ describe(EnvService.name, () => {
       env.owner = user;
       const [service] = await createMocks([ user ]);
 
-      await expect(service.tryFindAll(user.id))
+      await expect(service.tryFindAll(user.id, {}))
         .resolves
         .toMatchObject([ env ])
     });

@@ -1,10 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { Expose } from "class-transformer"
-import { IsNumber, Min } from "class-validator"
+import { Expose, Type } from "class-transformer"
+import { IsNumber, IsObject, Min } from "class-validator"
 
 export class CreateScriptContentDto {
   @ApiProperty()
   @Expose()
+  @IsObject()
+  @Type(() => Object)
   astJson: Record<string, any>
 
   @ApiProperty({ default: 1 })

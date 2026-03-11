@@ -15,10 +15,10 @@ export class ScriptsRunsGrpcClientService implements OnModuleInit{
     this.serviceClient = this.client.getService<WorkerServiceClient>(WORKER_SERVICE_NAME);
   }
 
-  public startJob(jobId: string, token: string) {
+  public startJob(jobId: string, script: Record<string, any> | undefined, env: Record<string, any> | undefined, token: string) {
     const metadata = new Metadata();
     metadata.set('authorization', `Bearer ${token}`)
-    return this.serviceClient.startJob({ jobId }, metadata);
+    return this.serviceClient.startJob({ jobId, script, env }, metadata);
   }
 
   public cancelJob(jobId: string, token: string) {

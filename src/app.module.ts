@@ -14,7 +14,7 @@ import { EnvModule } from './env/env.module';
   imports: [
     SharedModule,
     ScheduleModule.forRoot(),
-    AccessControlModule.forRoles(appRoles), 
+    AccessControlModule.forRoles(appRoles),
     AuthModule,
     UsersModule, 
     DatabaseModule, 

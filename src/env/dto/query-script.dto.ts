@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
-import { IsIn, IsOptional, IsUUID, Length, ValidateNested } from "class-validator";
+import { IsIn, IsOptional, Length, ValidateNested } from "class-validator";
 import { PaginationDto } from "src/shared/dto/pagination.dto";
 
-export class ScriptSortDto {
+export class EnvSortDto {
   @ApiProperty()
   @Expose()
   @IsIn(['name', 'createdAt', 'updatedAt'])
@@ -15,40 +15,28 @@ export class ScriptSortDto {
   order: 'ASC' | 'DESC' = 'ASC';
 }
 
-export class ScriptFilterDto {
+export class EnvFilterDto {
   @ApiProperty()
   @Expose()
   @IsOptional()
   @Length(1, 32)
   name?: string;
-
-  @ApiPropertyOptional()
-  @Expose()
-  @IsOptional()
-  @IsUUID()
-  scriptVersionId?: string;
-
-  @ApiPropertyOptional()
-  @Expose()
-  @IsOptional()
-  @IsUUID()
-  runId?: string
 }
 
-export class QueryScriptDto {
-  @ApiPropertyOptional({ type: () => ScriptSortDto })
+export class QueryEnvDto {
+  @ApiPropertyOptional({ type: () => EnvSortDto })
   @Expose()
   @IsOptional()
   @ValidateNested()
-  @Type(() => ScriptSortDto)
-  sorting?: ScriptSortDto;
+  @Type(() => EnvSortDto)
+  sorting?: EnvSortDto;
 
-  @ApiPropertyOptional({ type: () => ScriptFilterDto })
+  @ApiPropertyOptional({ type: () => EnvFilterDto })
   @Expose()
   @IsOptional()
   @ValidateNested()
-  @Type(() => ScriptFilterDto)
-  filtering?: ScriptFilterDto
+  @Type(() => EnvFilterDto)
+  filtering?: EnvFilterDto
 
   @ApiPropertyOptional({ type: () => PaginationDto })
   @Expose()
