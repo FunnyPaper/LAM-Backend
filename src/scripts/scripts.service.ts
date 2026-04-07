@@ -11,13 +11,18 @@ import { ScriptVersionEntity } from './entities/script-version.entity';
 import { ScriptRunEntity } from './entities/script-run.entity';
 import { Require } from 'src/shared/types/require';
 import { PaginatedScriptDto } from './dto/paginated-script.dto';
+import { ScriptsRunsGrpcClientService } from './scripts-runs-grpc-client.service';
+import { AuthService } from 'src/auth/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ScriptsService {
   public constructor(
     @InjectRepository(ScriptEntity)
     private readonly scriptsRepo: Repository<ScriptEntity>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly grpcClientService: ScriptsRunsGrpcClientService,
+    private readonly authService: AuthService
   ) {}
   
   public async create(userId: string, createScriptDto: CreateScriptDto): Promise<ScriptEntity> {
@@ -98,6 +103,12 @@ export class ScriptsService {
   public async remove(userId: string, scriptId: string): Promise<void> {
     const script = await this.findById(userId, scriptId);
     await this.scriptsRepo.delete(script.id);
+  }
+
+  public async getScriptValidationSchema(userId: string, version: string) {
+    const token = this.authService.createGrpcToken(userId, ['script:validate']);
+    const response = await firstValueFrom(this.grpcClientService.getScriptValidationSchema(version, token));
+    return response.fields;
   }
 
   private parseRelations(userId: string, dto: QueryScriptDto): FindOptionsRelations<ScriptEntity> {

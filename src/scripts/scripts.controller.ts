@@ -92,4 +92,13 @@ export class ScriptsController {
   ) {
     return this.scriptsService.remove(userId, scriptId);
   }
+
+  @UseRoles({ resource: 'scripts', action: 'read', possession: 'own'})
+  @Get('validation-schema/:version')
+  async getScriptValidationSchema(
+    @RequestUserId() userId: string,
+    @Param('version') version: string
+  ) {
+    return this.scriptsService.getScriptValidationSchema(userId, version);
+  }
 }

@@ -121,17 +121,17 @@ export class AuthService {
     return this.usersService.findById(payload.sub as string);
   }
 
-  public createGrpcToken(runId: string, userId: string) {
+  public createGrpcToken(userId: string, scope: string[], payload?: Record<string, string>) {
     return this.jwtService.sign(
       {
         iss: 'api-service',
         sub: 'script-run',
-        runId,
         userId,
-        scope: ['run:start', 'run:cancel'],
+        scope,
+        ...payload
       },
       {
-        secret: process.env.GRPC_ACCEC_TOKEN_SECRET, 
+        secret: process.env.GRPC_ACCESS_TOKEN_SECRET, 
         expiresIn: '2m' 
       },
     );

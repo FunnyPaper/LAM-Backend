@@ -67,7 +67,7 @@ export class ScriptsRunsService {
 
     const run = await this.scriptsRunsRepo.save(scriptRun);
 
-    void this.scriptRunsProcessor.enqueueStartJob(
+    this.scriptRunsProcessor.enqueueStartJob(
         run.id,
         userId,
         scriptVersion.content.astJson!,
@@ -151,7 +151,7 @@ export class ScriptsRunsService {
       throw new ScriptRunCancelStatusError(userId, scriptRunId, run.status);
     }
 
-    const token = this.authService.createGrpcToken(run.id, userId);
+    const token = this.authService.createGrpcToken(userId, ['run:cancel'], { runId: run.id });
     await this.scriptRunsProcessor.cancelJob(run.id, token);
 
     return this.scriptsRunsRepo.save({

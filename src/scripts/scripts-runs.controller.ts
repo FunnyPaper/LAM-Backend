@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, Request, UseGuards, SerializeOptions, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, SerializeOptions, Query, UseInterceptors } from '@nestjs/common';
 import { CreateScriptRunDto } from './dto/create-script-run.dto';
 import { QueryScriptRunDto, ScriptRunFilterDto, ScriptRunSortDto } from './dto/query-script-run.dto';
 import { ReexecuteScriptRunDto } from './dto/reexecute-script-run.dto';
@@ -13,6 +13,7 @@ import { ApiDeepQuery } from 'src/shared/decorators/api-deep-query';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { PaginatedScriptRunDto } from './dto/paginated-script-run.dto';
 import { plainToInstance } from 'class-transformer';
+import { IdempotencyInterceptor } from 'src/idempotency/idempotency.interceptor';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, ACGuard, UserRequestIdGuard)
@@ -23,6 +24,7 @@ export class ScriptsRunsController {
 
   @SerializeOptions({ type: ScriptRunDto })
   @UseRoles({ resource: 'scripts-runs', action: 'create', possession: 'own' })
+  @UseInterceptors(IdempotencyInterceptor)
   @Post()
   create(
     @RequestUserId() userId: string,

@@ -5,7 +5,7 @@ import { WORKER_SERVICE_NAME, WorkerServiceClient } from "src/proto/worker";
 
 @Injectable()
 export class ScriptsRunsGrpcClientService implements OnModuleInit{
-  private serviceClient: WorkerServiceClient;
+  private serviceClient!: WorkerServiceClient;
 
   constructor(
     @Inject(WORKER_SERVICE_NAME) private client: ClientGrpc
@@ -25,5 +25,11 @@ export class ScriptsRunsGrpcClientService implements OnModuleInit{
     const metadata = new Metadata();
     metadata.set('authorization', `Bearer ${token}`)
     return this.serviceClient.cancelJob({ jobId }, metadata);
+  }
+
+  public getScriptValidationSchema(version: string, token: string) {
+    const metadata = new Metadata();
+    metadata.set('authorization', `Bearer ${token}`)
+    return this.serviceClient.getScriptValidationSchema({ version }, metadata);
   }
 }

@@ -61,7 +61,7 @@ export class ScriptsRunsProcessor {
     ) {
         if(!this.pendingRuns.has(runId)) return; 
 
-        const token = this.authService.createGrpcToken(runId, userId);
+        const token = this.authService.createGrpcToken(userId, ['run:start'], { runId: runId });
         const stream = this.grpcClientService.startJob(runId, script, env, token);
 
         await new Promise<void>((resolve) => {

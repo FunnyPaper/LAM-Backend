@@ -21,12 +21,14 @@ import { join } from 'path';
 import { ScriptsRunsGrpcClientService } from './scripts-runs-grpc-client.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { ScriptsRunsProcessor } from './processors/scripts-runs.processor';
+import { IdempotencyModule } from 'src/idempotency/idempotency.module';
 
 @Module({
   imports: [
     UsersModule,
     EnvModule,
     AuthModule,
+    IdempotencyModule,
     ClientsModule.register([
       {
         name: WORKER_SERVICE_NAME,
@@ -34,7 +36,7 @@ import { ScriptsRunsProcessor } from './processors/scripts-runs.processor';
         options: {
           url: `${process.env.GRPC_HOST}:${process.env.GRPC_PORT}`,
           package: WORKER_PACKAGE_NAME,
-          protoPath: join(__dirname, '../../../proto/worker.proto'),
+          protoPath: join(process.cwd(), 'proto/worker.proto'),
         },
       },
     ]),

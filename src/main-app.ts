@@ -1,0 +1,40 @@
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
+import { ValidationPipe } from '@nestjs/common';
+import { GlobalClassSerializerInterceptor } from './shared/interceptors/global-class-serializer.interceptor';
+import { DomainErrorFilter } from './shared/filters/domain-error.filter';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { CommandModule } from './commands/command.module';
+import { InitCommand } from './commands/init.command';
+import { DataSource } from 'typeorm';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  const dataSource = app.get(DataSource);
+  await dataSource.runMigrations();
+
+  const commandContext = await NestFactory.createApplicationContext(CommandModule);
+  const initCommand = commandContext.get(InitCommand);
+  await initCommand.run();
+  await commandContext.close();
+
+  app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
+  app.useGlobalFilters(new DomainErrorFilter())
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    transformOptions: { enableImplicitConversion: true }
+  }))
+  app.set('query parser', 'extended');
+
+  const configService: ConfigService = app.get(ConfigService);
+  const type: string = configService.get('type')!;
+  const port: string = process.env.NODE_PORT || '3000';
+
+  await app.listen(port);
+  console.log(`Running in mode ${type} on port ${port}`);
+}
+
+void bootstrap();
