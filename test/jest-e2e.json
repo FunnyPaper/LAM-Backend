@@ -16,5 +16,8 @@
   },
   "setupFiles": [
     "../jest.setup.js"
+  ],
+  "transformIgnorePatterns": [
+    "node_modules/(?!p-queue|p-timeout|eventemitter3)"
   ]
 }

@@ -7,8 +7,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { EnvDto } from './dto/env.dto';
 import { UserOwnershipGuardFactory } from 'src/auth/guards/user-ownership.guard';
-import { UserRequestIdGuard } from 'src/auth/guards/user-request-id-guard';
-import { RequestUserId } from 'src/auth/decorators/request-user-id';
 import { plainToInstance } from 'class-transformer';
 import { ApiDeepQuery } from 'src/shared/decorators/api-deep-query';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
@@ -16,7 +14,7 @@ import { EnvFilterDto, EnvSortDto, QueryEnvDto } from './dto/query-script.dto';
 import { PaginatedEnvDto } from './dto/paginated-env.dto';
 
 @ApiBearerAuth('access-token')
-@UseGuards(JwtAuthGuard, ACGuard, UserOwnershipGuardFactory('userId'), UserRequestIdGuard)
+@UseGuards(JwtAuthGuard, ACGuard, UserOwnershipGuardFactory('userId'))
 @ApiQuery({ name: 'userId', type: String, required: false })
 @Controller('users/:userId/envs')
 export class EnvController {
@@ -26,7 +24,7 @@ export class EnvController {
   @UseRoles({ resource: 'env', action: 'create', possession: 'own' })
   @Post()
   create(
-    @RequestUserId() userId: string,
+    @Param('userId') userId: string,
     @Body() createEnvDto: CreateEnvDto
   ) {
     return this.envService.create(userId, createEnvDto);
@@ -36,7 +34,7 @@ export class EnvController {
   @UseRoles({ resource: 'env', action: 'update', possession: 'own' })
   @Put(':envId')
   update(
-    @RequestUserId() userId: string,
+    @Param('userId') userId: string,
     @Param('envId') envId: string,
     @Body() updateEnvDto: UpdateEnvDto
   ) {
@@ -63,7 +61,7 @@ export class EnvController {
   })
   @Get()
   async findAll(
-    @RequestUserId() userId: string, 
+    @Param('userId') userId: string, 
     @Query() dto: QueryEnvDto
   ): Promise<EnvDto[] | PaginatedEnvDto> {
     const results = await this.envService.tryFindAll(userId, dto);
@@ -79,7 +77,7 @@ export class EnvController {
   @UseRoles({ resource: 'env', action: 'read', possession: 'own' })
   @Get(':envId')
   findOne(
-    @RequestUserId() userId: string,
+    @Param('userId') userId: string,
     @Param('envId') envId: string
   ) {
     return this.envService.findById(userId, envId);
@@ -89,7 +87,7 @@ export class EnvController {
   @UseRoles({ resource: 'env', action: 'delete', possession: 'own' })
   @Delete(':envId')
   remove(
-    @RequestUserId() userId: string,
+    @Param('userId') userId: string,
     @Param('envId') envId: string
   ) {
     return this.envService.remove(userId, envId);

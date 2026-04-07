@@ -15,4 +15,10 @@ export class EnvDto {
   @ApiProperty({ type: Object, nullable: true })
   @Expose()
   data?: Record<string, any>;
+
+  @Expose()
+  createdAt: Date;
+  
+  @Expose()
+  updatedAt: Date;
 }
