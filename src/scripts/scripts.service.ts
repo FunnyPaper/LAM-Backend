@@ -108,7 +108,7 @@ export class ScriptsService {
   public async getScriptValidationSchema(userId: string, version: string) {
     const token = this.authService.createGrpcToken(userId, ['script:validate']);
     const response = await firstValueFrom(this.grpcClientService.getScriptValidationSchema(version, token));
-    return response.fields;
+    return response;
   }
 
   private parseRelations(userId: string, dto: QueryScriptDto): FindOptionsRelations<ScriptEntity> {
