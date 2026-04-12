@@ -5,12 +5,12 @@ import { mapDomainErrorStatus } from "./map-domain-error-status";
 
 @Catch(DomainError)
 export class DomainErrorFilter implements ExceptionFilter {
-  catch(error: DomainError, host: ArgumentsHost) {
-    const response = host.switchToHttp().getResponse();
+    catch(error: DomainError, host: ArgumentsHost) {
+        const response = host.switchToHttp().getResponse();
 
-    response.status(mapDomainErrorStatus(error.code)).json({
-      error: error.code,
-      message: error.message,
-    });
-  }
+        response.status(mapDomainErrorStatus(error.code)).json({
+            error: error.code,
+            message: error.message,
+        });
+    }
 }

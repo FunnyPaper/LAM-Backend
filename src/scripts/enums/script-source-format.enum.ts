@@ -1,3 +1,3 @@
 export enum ScriptSourceFormatEnum {
-  Json = "json"
+    Json = "json"
 }

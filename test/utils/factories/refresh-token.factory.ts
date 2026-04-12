@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker'
+import { faker } from '@faker-js/faker';
 import { FakeRefreshToken } from "test/utils/entities/refresh-token";
 import { FakeUser } from 'test/utils/entities/user';
 import { OneOfObject, oneOfObject } from 'test/utils/one-of-object';
@@ -6,62 +6,62 @@ import { JwtService } from '@nestjs/jwt';
 import ms from 'ms';
 import { computeDate } from 'src/utils/ms.utils';
 import { HashService } from 'src/shared/providers/hash.service';
+import { ConfigService } from '@nestjs/config';
 
 const jwtService = new JwtService()
-const hashService = new HashService()
+const hashService = new HashService(new ConfigService({ hash: { rounds: parseInt(process.env.HASH_SALT_ROUNDS!, 10) } }))
 
 export type CreateRefreshTokenConfig = {
-  linkRelations?: boolean,
-  overrides?: OneOfObject<Partial<FakeRefreshToken>>
+    linkRelations?: boolean,
+    overrides?: OneOfObject<Partial<FakeRefreshToken>>
 }
 export async function createRefreshToken(config?: CreateRefreshTokenConfig): Promise<FakeRefreshToken> {
-  const { linkRelations, overrides } = config || {};
+    const { linkRelations, overrides } = config || {};
 
-  const createdAtDate = faker.date.recent({ days: 1 });
-  const updatedAtDate = faker.date.soon({ days: 5, refDate: createdAtDate });
+    const createdAtDate = faker.date.recent({ days: 1 });
+    const updatedAtDate = faker.date.soon({ days: 5, refDate: createdAtDate });
 
-  const processedOverrides = overrides && await oneOfObject(overrides);
+    const processedOverrides = overrides && await oneOfObject(overrides);
 
-  const result = {
-    id: faker.string.uuid(),
-    createdAt: createdAtDate,
-    updatedAt: updatedAtDate,
-    expiresAt: computeDate(process.env.JWT_REFRESH_EXPIRES_IN! as ms.StringValue),
-    // If user provided, assign userId and generate tokenHash (if not provided)
-    ...(processedOverrides?.user && { 
-      ...(linkRelations && { user: processedOverrides.user }),
-      userId: processedOverrides.id
+    const result = {
+        id: faker.string.uuid(),
+        createdAt: createdAtDate,
+        updatedAt: updatedAtDate,
+        expiresAt: computeDate(process.env.JWT_REFRESH_EXPIRES_IN! as ms.StringValue),
+        // If user provided, assign userId and generate tokenHash (if not provided)
+        ...(processedOverrides?.user && {
+            ...(linkRelations && { user: processedOverrides.user }),
+            userId: processedOverrides.id
+        }),
+        ...processedOverrides
     }
-    ),
-    ...processedOverrides
-  }
 
-  if(processedOverrides?.user && !result.tokenHash) {
-    const hash = await createTokenHash({
-      user: processedOverrides.user, 
-      secret: process.env.JWT_REFRESH_SECRET!,
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN! as ms.StringValue,
-    });
-    result.tokenHash = hash;
-  }
+    if (processedOverrides?.user && !result.tokenHash) {
+        const hash = await createTokenHash({
+            user: processedOverrides.user,
+            secret: process.env.JWT_REFRESH_SECRET!,
+            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN! as ms.StringValue,
+        });
+        result.tokenHash = hash;
+    }
 
-  return result;
+    return result;
 }
 
 export type CreateTokenHashConfig = {
-  user: FakeUser, secret: string, expiresIn: ms.StringValue
+    user: FakeUser, secret: string, expiresIn: ms.StringValue
 }
 export async function createTokenHash(config: CreateTokenHashConfig) {
-  const { user, secret, expiresIn } = config;
+    const { user, secret, expiresIn } = config;
 
-  const jwtToken = jwtService.sign({ 
-    sub: user.id, 
-    username: user.username, 
-    roles: [ user.role ]
-  }, {
-    expiresIn: expiresIn,
-    secret: secret,
-  });
+    const jwtToken = jwtService.sign({
+        sub: user.id,
+        username: user.username,
+        roles: [user.role]
+    }, {
+        expiresIn: expiresIn,
+        secret: secret,
+    });
 
-  return await hashService.hash(jwtToken);
+    return await hashService.hash(jwtToken);
 }

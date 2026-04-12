@@ -4,13 +4,13 @@ import { Expose } from "class-transformer"
 import { IsEnum, IsString } from "class-validator"
 
 export class CreateScriptSourceDto {
-  @ApiProperty({ enum: ScriptSourceFormatEnum })
-  @Expose()
-  @IsEnum(ScriptSourceFormatEnum)
-  format: ScriptSourceFormatEnum
+    @ApiProperty({ enum: ScriptSourceFormatEnum })
+    @Expose()
+    @IsEnum(ScriptSourceFormatEnum)
+    format!: ScriptSourceFormatEnum
 
-  @ApiProperty()
-  @Expose()
-  @IsString()
-  content: string
+    @ApiProperty()
+    @Expose()
+    @IsString()
+    content!: string
 }

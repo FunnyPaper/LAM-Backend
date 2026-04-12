@@ -5,13 +5,13 @@ import { ApiProperty } from "@nestjs/swagger"
 import { ValidateNested } from "class-validator"
 
 export class CreateScriptVersionDto {
-  @ApiProperty()
-  @ValidateNested()
-  @Type(() => CreateScriptContentDto)
-  content: CreateScriptContentDto
+    @ApiProperty()
+    @ValidateNested()
+    @Type(() => CreateScriptContentDto)
+    content!: CreateScriptContentDto
 
-  @ApiProperty()
-  @ValidateNested()
-  @Type(() => CreateScriptSourceDto)
-  source: CreateScriptSourceDto
+    @ApiProperty()
+    @ValidateNested()
+    @Type(() => CreateScriptSourceDto)
+    source!: CreateScriptSourceDto
 }

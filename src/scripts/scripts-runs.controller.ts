@@ -20,89 +20,89 @@ import { IdempotencyInterceptor } from 'src/idempotency/idempotency.interceptor'
 @ApiQuery({ name: 'userId', type: String, required: false })
 @Controller('runs')
 export class ScriptsRunsController {
-  constructor(private readonly scriptsRunsService: ScriptsRunsService) {}
+    constructor(private readonly scriptsRunsService: ScriptsRunsService) { }
 
-  @SerializeOptions({ type: ScriptRunDto })
-  @UseRoles({ resource: 'scripts-runs', action: 'create', possession: 'own' })
-  @UseInterceptors(IdempotencyInterceptor)
-  @Post()
-  create(
-    @RequestUserId() userId: string,
-    @Body() dto: CreateScriptRunDto
-  ) {
-    return this.scriptsRunsService.create(userId, dto);
-  }
+    @SerializeOptions({ type: ScriptRunDto })
+    @UseRoles({ resource: 'scripts-runs', action: 'create', possession: 'own' })
+    @UseInterceptors(IdempotencyInterceptor)
+    @Post()
+    create(
+        @RequestUserId() userId: string,
+        @Body() dto: CreateScriptRunDto
+    ) {
+        return this.scriptsRunsService.create(userId, dto);
+    }
 
-  @SerializeOptions({ type: ScriptRunDto })
-  @UseRoles({ resource: 'scripts-runs', action: 'read', possession: 'own' })
-  @Get(':id')
-  findOne(
-    @RequestUserId() userId: string,
-    @Param('id') id: string
-  ) {
-    return this.scriptsRunsService.findById(userId, id);
-  }
+    @SerializeOptions({ type: ScriptRunDto })
+    @UseRoles({ resource: 'scripts-runs', action: 'read', possession: 'own' })
+    @Get(':id')
+    findOne(
+        @RequestUserId() userId: string,
+        @Param('id') id: string
+    ) {
+        return this.scriptsRunsService.findById(userId, id);
+    }
 
-  @SerializeOptions({ excludeExtraneousValues: true })
-  @UseRoles({ resource: 'scripts-runs', action: 'read', possession: 'own' })
-  @ApiDeepQuery('filtering', ScriptRunFilterDto)
-  @ApiDeepQuery('sorting', ScriptRunSortDto)
-  @ApiDeepQuery('pagination', PaginationDto)
-  @ApiExtraModels(ScriptRunDto, PaginatedScriptRunDto)
-  @ApiOkResponse({
-    schema: {
-      oneOf: [
-        {
-          type: 'array',
-          items: { $ref: getSchemaPath(ScriptRunDto) }
-        },
-        {
-          $ref: getSchemaPath(PaginatedScriptRunDto)
+    @SerializeOptions({ excludeExtraneousValues: true })
+    @UseRoles({ resource: 'scripts-runs', action: 'read', possession: 'own' })
+    @ApiDeepQuery('filtering', ScriptRunFilterDto)
+    @ApiDeepQuery('sorting', ScriptRunSortDto)
+    @ApiDeepQuery('pagination', PaginationDto)
+    @ApiExtraModels(ScriptRunDto, PaginatedScriptRunDto)
+    @ApiOkResponse({
+        schema: {
+            oneOf: [
+                {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(ScriptRunDto) }
+                },
+                {
+                    $ref: getSchemaPath(PaginatedScriptRunDto)
+                }
+            ]
         }
-      ]
+    })
+    @Get()
+    async findAll(
+        @RequestUserId() userId: string,
+        @Query() dto: QueryScriptRunDto
+    ): Promise<ScriptRunDto[] | PaginatedScriptRunDto> {
+        const results = await this.scriptsRunsService.findAll(userId, dto);
+
+        if ('metadata' in results) {
+            return plainToInstance(PaginatedScriptRunDto, results, { excludeExtraneousValues: true });
+        }
+
+        return plainToInstance(ScriptRunDto, results, { excludeExtraneousValues: true });
     }
-  })
-  @Get()
-  async findAll(
-    @RequestUserId() userId: string,
-    @Query() dto: QueryScriptRunDto
-  ): Promise<ScriptRunDto[] | PaginatedScriptRunDto> {
-    const results = await this.scriptsRunsService.findAll(userId, dto);
 
-    if('metadata' in results) {
-      return plainToInstance(PaginatedScriptRunDto, results, { excludeExtraneousValues: true });
+    @SerializeOptions({ type: ScriptRunDto })
+    @UseRoles({ resource: 'scripts-runs', action: 'update', possession: 'own' })
+    @Patch(':id/cancel')
+    cancel(
+        @RequestUserId() userId: string,
+        @Param('id') id: string
+    ) {
+        return this.scriptsRunsService.cancel(userId, id);
     }
 
-    return plainToInstance(ScriptRunDto, results, { excludeExtraneousValues: true });
-  }
+    @SerializeOptions({ type: ScriptRunDto })
+    @UseRoles({ resource: 'scripts-runs', action: 'create', possession: 'own' })
+    @Post(':id/reexecute')
+    reexecute(
+        @RequestUserId() userId: string,
+        @Param('id') id: string,
+        @Body() dto: ReexecuteScriptRunDto
+    ) {
+        return this.scriptsRunsService.reexecute(userId, id, dto);
+    }
 
-  @SerializeOptions({ type: ScriptRunDto })
-  @UseRoles({ resource: 'scripts-runs', action: 'update', possession: 'own' })
-  @Patch(':id/cancel')
-  cancel(
-    @RequestUserId() userId: string,
-    @Param('id') id: string
-  ) {
-    return this.scriptsRunsService.cancel(userId, id);
-  }
-
-  @SerializeOptions({ type: ScriptRunDto })
-  @UseRoles({ resource: 'scripts-runs', action: 'create', possession: 'own' })
-  @Post(':id/reexecute')
-  reexecute(
-    @RequestUserId() userId: string,
-    @Param('id') id: string,
-    @Body() dto: ReexecuteScriptRunDto
-  ) {
-    return this.scriptsRunsService.reexecute(userId, id, dto);
-  }
-
-  @UseRoles({ resource: 'scripts-runs', action: 'delete', possession: 'own' })
-  @Delete(':id')
-  remove(
-    @RequestUserId() userId: string,
-    @Param('id') id: string
-  ) {
-    return this.scriptsRunsService.remove(userId, id);
-  }
+    @UseRoles({ resource: 'scripts-runs', action: 'delete', possession: 'own' })
+    @Delete(':id')
+    remove(
+        @RequestUserId() userId: string,
+        @Param('id') id: string
+    ) {
+        return this.scriptsRunsService.remove(userId, id);
+    }
 }

@@ -12,64 +12,64 @@ import { UserOwnershipGuardFactory } from 'src/auth/guards/user-ownership.guard'
 @UseGuards(JwtAuthGuard, ACGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+    constructor(private usersService: UsersService) { }
 
-  @ApiCreatedResponse({ type: UserDto })
-  @UseRoles({ resource: 'users', action: 'read', possession: 'any' })
-  @SerializeOptions({ type: UserDto })
-  @Get()
-  findAll(): Promise<UserDto[]> {
-    return this.usersService.findAll();
-  }
-
-  @ApiCreatedResponse({ type: UserDto })
-  @UseRoles({ resource: 'users', action: 'read', possession: 'own' })
-  @SerializeOptions({ type: UserDto })
-  @Get('me')
-  me(
-    @Request() req: {       
-      user: { 
-        id: string, 
-        username: string, 
-        roles: Role[] 
-      }  
+    @ApiCreatedResponse({ type: UserDto })
+    @UseRoles({ resource: 'users', action: 'read', possession: 'any' })
+    @SerializeOptions({ type: UserDto })
+    @Get()
+    findAll(): Promise<UserDto[]> {
+        return this.usersService.findAll();
     }
-  ): Promise<UserDto> {
-    return this.usersService.findById(req.user.id);
-  }
 
-  @ApiCreatedResponse({ type: UserDto })
-  @UseGuards(UserOwnershipGuardFactory('id'))
-  @UseRoles({ resource: 'users', action: 'read', possession: 'any' })
-  @SerializeOptions({ type: UserDto })
-  @Get(':id')
-  find(
-    @Param('id') id: string
-  ): Promise<UserDto> {
-    return this.usersService.findById(id);
-  }
+    @ApiCreatedResponse({ type: UserDto })
+    @UseRoles({ resource: 'users', action: 'read', possession: 'own' })
+    @SerializeOptions({ type: UserDto })
+    @Get('me')
+    me(
+        @Request() req: {
+            user: {
+                id: string,
+                username: string,
+                roles: Role[]
+            }
+        }
+    ): Promise<UserDto> {
+        return this.usersService.findById(req.user.id);
+    }
 
-  @ApiCreatedResponse({ type: UserDto })
-  @UseRoles({ resource: 'users', action: 'create', possession: 'any' })
-  @SerializeOptions({ type: UserDto })
-  @Post()
-  create(
-    @Request() req: { 
-      user: { 
-        id: string, 
-        username: string, 
-        roles: Role[] 
-      } 
-    },
-    @Body() body: CreateUserDto
-  ) {
-    const { username, password, role } = body;
+    @ApiCreatedResponse({ type: UserDto })
+    @UseGuards(UserOwnershipGuardFactory('id'))
+    @UseRoles({ resource: 'users', action: 'read', possession: 'any' })
+    @SerializeOptions({ type: UserDto })
+    @Get(':id')
+    find(
+        @Param('id') id: string
+    ): Promise<UserDto> {
+        return this.usersService.findById(id);
+    }
 
-    return this.usersService.tryCreateWithSupervisor({ 
-      creator: req.user, 
-      username,
-      password,
-      role: role
-    });
-  }
+    @ApiCreatedResponse({ type: UserDto })
+    @UseRoles({ resource: 'users', action: 'create', possession: 'any' })
+    @SerializeOptions({ type: UserDto })
+    @Post()
+    create(
+        @Request() req: {
+            user: {
+                id: string,
+                username: string,
+                roles: Role[]
+            }
+        },
+        @Body() body: CreateUserDto
+    ) {
+        const { username, password, role } = body;
+
+        return this.usersService.tryCreateWithSupervisor({
+            creator: req.user,
+            username,
+            password,
+            role: role
+        });
+    }
 }

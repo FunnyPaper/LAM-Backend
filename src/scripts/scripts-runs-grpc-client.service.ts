@@ -4,32 +4,32 @@ import type { ClientGrpc } from "@nestjs/microservices";
 import { WORKER_SERVICE_NAME, WorkerServiceClient } from "src/proto/worker";
 
 @Injectable()
-export class ScriptsRunsGrpcClientService implements OnModuleInit{
-  private serviceClient!: WorkerServiceClient;
+export class ScriptsRunsGrpcClientService implements OnModuleInit {
+    private serviceClient!: WorkerServiceClient;
 
-  constructor(
-    @Inject(WORKER_SERVICE_NAME) private client: ClientGrpc
-  ) {}
+    constructor(
+        @Inject(WORKER_SERVICE_NAME) private client: ClientGrpc
+    ) { }
 
-  onModuleInit() {
-    this.serviceClient = this.client.getService<WorkerServiceClient>(WORKER_SERVICE_NAME);
-  }
+    onModuleInit() {
+        this.serviceClient = this.client.getService<WorkerServiceClient>(WORKER_SERVICE_NAME);
+    }
 
-  public startJob(jobId: string, script: Record<string, any> | undefined, env: Record<string, any> | undefined, token: string) {
-    const metadata = new Metadata();
-    metadata.set('authorization', `Bearer ${token}`)
-    return this.serviceClient.startJob({ jobId, script, env }, metadata);
-  }
+    public startJob(jobId: string, script: Record<string, any> | undefined, env: Record<string, any> | undefined, token: string) {
+        const metadata = new Metadata();
+        metadata.set('authorization', `Bearer ${token}`)
+        return this.serviceClient.startJob({ jobId, script, env }, metadata);
+    }
 
-  public cancelJob(jobId: string, token: string) {
-    const metadata = new Metadata();
-    metadata.set('authorization', `Bearer ${token}`)
-    return this.serviceClient.cancelJob({ jobId }, metadata);
-  }
+    public cancelJob(jobId: string, token: string) {
+        const metadata = new Metadata();
+        metadata.set('authorization', `Bearer ${token}`)
+        return this.serviceClient.cancelJob({ jobId }, metadata);
+    }
 
-  public getScriptValidationSchema(version: string, token: string) {
-    const metadata = new Metadata();
-    metadata.set('authorization', `Bearer ${token}`)
-    return this.serviceClient.getScriptValidationSchema({ version }, metadata);
-  }
+    public getScriptValidationSchema(version: string, token: string) {
+        const metadata = new Metadata();
+        metadata.set('authorization', `Bearer ${token}`)
+        return this.serviceClient.getScriptValidationSchema({ version }, metadata);
+    }
 }

@@ -30,7 +30,7 @@ Section
 
 	# Install files
 	SetOutPath $INSTDIR
-	File /r "..\..\build\*"
+    File /r "${__DIR__}\..\..\build\*"
 
 	# Desktop shortcut
 	CreateShortcut "$DESKTOP\LAM Backend.lnk" "$INSTDIR\lam-backend.exe" "" "$INSTDIR\lam-backend.exe" 0 SW_SHOWNORMAL "" "LAM Backend Application"

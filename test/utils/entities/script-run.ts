@@ -5,7 +5,7 @@ import { FakeScriptRunResult } from "./script-run-result";
 import { FakeScriptVersion } from "./script-version";
 
 export class FakeScriptRun extends OmitType(ScriptRunEntity, ['env', 'result', 'scriptVersion']) {
-  env?: FakeEnv;
-  result?: FakeScriptRunResult;
-  scriptVersion?: FakeScriptVersion;
+    env?: FakeEnv;
+    result?: FakeScriptRunResult;
+    scriptVersion?: FakeScriptVersion;
 }

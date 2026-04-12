@@ -10,26 +10,26 @@ const enumType = columnEnumType(process.env.DB_TYPE!);
 
 @Entity({ name: 'script-source' })
 export class ScriptSourceEntity {
-  @PrimaryColumn('uuid')
-  scriptVersionId: string;
+    @PrimaryColumn('uuid')
+    scriptVersionId!: string;
 
-  @OneToOne(() => ScriptVersionEntity, (version) => version.source, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'scriptVersionId' })
-  scriptVersion: ScriptVersionEntity;
+    @OneToOne(() => ScriptVersionEntity, (version) => version.source, {
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn({ name: 'scriptVersionId' })
+    scriptVersion!: ScriptVersionEntity;
 
-  @Column({ type: enumType, enum: ScriptSourceFormatEnum })
-  format: ScriptSourceFormatEnum;
+    @Column({ type: enumType, enum: ScriptSourceFormatEnum })
+    format!: ScriptSourceFormatEnum;
 
-  @Column()
-  content: string;
-  
-  @CreateDateColumn(dateOptions)
-  @Type(() => Date)
-  createdAt: Date;
+    @Column()
+    content!: string;
 
-  @UpdateDateColumn(dateOptions)
-  @Type(() => Date)
-  updatedAt: Date;
+    @CreateDateColumn(dateOptions)
+    @Type(() => Date)
+    createdAt!: Date;
+
+    @UpdateDateColumn(dateOptions)
+    @Type(() => Date)
+    updatedAt!: Date;
 }

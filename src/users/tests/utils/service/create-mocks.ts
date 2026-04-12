@@ -1,5 +1,7 @@
+import { ConfigModule } from "@nestjs/config";
 import { TestingModule, Test } from "@nestjs/testing";
 import { getRepositoryToken } from "@nestjs/typeorm";
+import configuration from "src/configuration/configuration";
 import { HashService } from "src/shared/providers/hash.service";
 import { RefreshTokenService } from "src/tokens/refresh-token.service";
 import { UserEntity } from "src/users/entities/user.entity";
@@ -9,21 +11,27 @@ import { createRefreshTokenServiceMock } from "test/utils/mocks/refresh-token.se
 import { createUsersRepossitoryMock } from "test/utils/mocks/users.repository.mock";
 
 export async function createMocks(users: FakeUser[]) {
-  const refreshTokenServiceMock = createRefreshTokenServiceMock();
-  const usersRepositoryMock = createUsersRepossitoryMock(users);
+    const refreshTokenServiceMock = createRefreshTokenServiceMock();
+    const usersRepositoryMock = createUsersRepossitoryMock(users);
 
-  const module: TestingModule = await Test.createTestingModule({
-    providers: [
-      UsersService,
-      HashService,
-      { provide: getRepositoryToken(UserEntity), useValue: usersRepositoryMock },
-      { provide: RefreshTokenService, useValue: refreshTokenServiceMock }
-    ],
-  }).compile();
+    const module: TestingModule = await Test.createTestingModule({
+        imports: [
+            ConfigModule.forRoot({
+                isGlobal: true,
+                load: [() => configuration('.env.test')]
+            })
+        ],
+        providers: [
+            UsersService,
+            HashService,
+            { provide: getRepositoryToken(UserEntity), useValue: usersRepositoryMock },
+            { provide: RefreshTokenService, useValue: refreshTokenServiceMock }
+        ],
+    }).compile();
 
-  return [
-    module.get<UsersService>(UsersService),
-    usersRepositoryMock,
-    refreshTokenServiceMock
-  ] as const;
+    return [
+        module.get<UsersService>(UsersService),
+        usersRepositoryMock,
+        refreshTokenServiceMock
+    ] as const;
 }

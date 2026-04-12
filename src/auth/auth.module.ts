@@ -12,21 +12,21 @@ import { TokenCleanupService } from './token-cleanup.service';
 import { TokenModule } from '../tokens/token.module';
 
 @Module({
-  imports: [
-    UsersModule,
-    PassportModule,
-    JwtModule.register({}),
-    TokenModule
-  ],
-  providers: [
-    AuthService,
-    TokenCleanupService,
-    ConfigService,
-    LocalStrategy,
-    JwtStrategy,
-    JwtRefreshStrategy,
-  ],
-  controllers: [AuthController],
-  exports: [AuthService],
+    imports: [
+        UsersModule,
+        PassportModule,
+        JwtModule.register({}),
+        TokenModule
+    ],
+    providers: [
+        AuthService,
+        TokenCleanupService,
+        ConfigService,
+        LocalStrategy,
+        JwtStrategy,
+        JwtRefreshStrategy,
+    ],
+    controllers: [AuthController],
+    exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

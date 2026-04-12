@@ -3,11 +3,11 @@ import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class GlobalClassSerializerInterceptor extends ClassSerializerInterceptor {
-  constructor(reflector: Reflector) {
-    super(reflector, { excludeExtraneousValues: true });
-  }
+    constructor(reflector: Reflector) {
+        super(reflector, { excludeExtraneousValues: true });
+    }
 
-  intercept(context: ExecutionContext, next: CallHandler<any>) {
-    return super.intercept(context, next);
-  }
+    intercept(context: ExecutionContext, next: CallHandler<any>) {
+        return super.intercept(context, next);
+    }
 }

@@ -19,86 +19,86 @@ import { plainToInstance } from 'class-transformer';
 @ApiQuery({ name: 'userId', type: String, required: false })
 @Controller('scripts')
 export class ScriptsController {
-  constructor(private readonly scriptsService: ScriptsService) {}
+    constructor(private readonly scriptsService: ScriptsService) { }
 
-  @SerializeOptions({ type: ScriptDto })
-  @UseRoles({ resource: 'scripts', action: 'create', possession: 'own' })
-  @Post()
-  create(
-    @RequestUserId() userId: string,
-    @Body() dto: CreateScriptDto
-  ) {
-    return this.scriptsService.create(userId, dto);
-  }
+    @SerializeOptions({ type: ScriptDto })
+    @UseRoles({ resource: 'scripts', action: 'create', possession: 'own' })
+    @Post()
+    create(
+        @RequestUserId() userId: string,
+        @Body() dto: CreateScriptDto
+    ) {
+        return this.scriptsService.create(userId, dto);
+    }
 
-  @SerializeOptions({ type: ScriptDto })
-  @UseRoles({ resource: 'scripts', action: 'read', possession: 'own' })
-  @Get(':scriptId')
-  findOne(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string
-  ) {
-    return this.scriptsService.findById(userId, scriptId);
-  }
+    @SerializeOptions({ type: ScriptDto })
+    @UseRoles({ resource: 'scripts', action: 'read', possession: 'own' })
+    @Get(':scriptId')
+    findOne(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string
+    ) {
+        return this.scriptsService.findById(userId, scriptId);
+    }
 
-  @UseRoles({ resource: 'scripts', action: 'read', possession: 'own' })
-  @ApiDeepQuery('filtering', ScriptFilterDto)
-  @ApiDeepQuery('sorting', ScriptSortDto)
-  @ApiDeepQuery('pagination', PaginationDto)
-  @ApiExtraModels(ScriptDto, PaginatedScriptDto)
-  @ApiOkResponse({
-    schema: {
-      oneOf: [
-        {
-          type: 'array',
-          items: { $ref: getSchemaPath(ScriptDto) }
-        },
-        {
-          $ref: getSchemaPath(PaginatedScriptDto)
+    @UseRoles({ resource: 'scripts', action: 'read', possession: 'own' })
+    @ApiDeepQuery('filtering', ScriptFilterDto)
+    @ApiDeepQuery('sorting', ScriptSortDto)
+    @ApiDeepQuery('pagination', PaginationDto)
+    @ApiExtraModels(ScriptDto, PaginatedScriptDto)
+    @ApiOkResponse({
+        schema: {
+            oneOf: [
+                {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(ScriptDto) }
+                },
+                {
+                    $ref: getSchemaPath(PaginatedScriptDto)
+                }
+            ]
         }
-      ]
+    })
+    @Get()
+    async findAll(
+        @RequestUserId() userId: string,
+        @Query() dto: QueryScriptDto
+    ): Promise<ScriptDto[] | PaginatedScriptDto> {
+        const results = await this.scriptsService.findAll(userId, dto);
+
+        if ('metadata' in results) {
+            return plainToInstance(PaginatedScriptDto, results, { excludeExtraneousValues: true });
+        }
+
+        return plainToInstance(ScriptDto, results, { excludeExtraneousValues: true });
     }
-  })
-  @Get()
-  async findAll(
-    @RequestUserId() userId: string,
-    @Query() dto: QueryScriptDto
-  ): Promise<ScriptDto[] | PaginatedScriptDto> {
-    const results = await this.scriptsService.findAll(userId, dto);
 
-    if('metadata' in results) {
-      return plainToInstance(PaginatedScriptDto, results, { excludeExtraneousValues: true });
+    @SerializeOptions({ type: ScriptDto })
+    @UseRoles({ resource: 'scripts', action: 'update', possession: 'own' })
+    @Put(':scriptId')
+    update(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Body() dto: UpdateScriptDto
+    ) {
+        return this.scriptsService.update(userId, scriptId, dto);
     }
 
-    return plainToInstance(ScriptDto, results, { excludeExtraneousValues: true });
-  }
+    @UseRoles({ resource: 'scripts', action: 'delete', possession: 'own' })
+    @Delete(':scriptId')
+    remove(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string
+    ) {
+        return this.scriptsService.remove(userId, scriptId);
+    }
 
-  @SerializeOptions({ type: ScriptDto })
-  @UseRoles({ resource: 'scripts', action: 'update', possession: 'own' })
-  @Put(':scriptId')
-  update(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Body() dto: UpdateScriptDto
-  ) {
-    return this.scriptsService.update(userId, scriptId, dto);
-  }
-
-  @UseRoles({ resource: 'scripts', action: 'delete', possession: 'own' })
-  @Delete(':scriptId')
-  remove(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string
-  ) {
-    return this.scriptsService.remove(userId, scriptId);
-  }
-
-  @UseRoles({ resource: 'scripts', action: 'read', possession: 'own'})
-  @Get('validation-schema/:version')
-  async getScriptValidationSchema(
-    @RequestUserId() userId: string,
-    @Param('version') version: string
-  ) {
-    return this.scriptsService.getScriptValidationSchema(userId, version);
-  }
+    @UseRoles({ resource: 'scripts', action: 'read', possession: 'own' })
+    @Get('validation-schema/:version')
+    async getScriptValidationSchema(
+        @RequestUserId() userId: string,
+        @Param('version') version: string
+    ) {
+        return this.scriptsService.getScriptValidationSchema(userId, version);
+    }
 }

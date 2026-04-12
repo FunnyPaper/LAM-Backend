@@ -1,13 +1,18 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './configuration';
+import { ConfigurationType } from './types/configuration.type';
 
-@Module({
-  imports: [
-    ConfigModule.forRoot({
-      load: [configuration],
-      isGlobal: true
-    })
-  ]
-})
-export class ConfigurationModule {}
+@Module({})
+export class ConfigurationModule {
+    static register(configuration: () => Promise<ConfigurationType> | ConfigurationType): DynamicModule {
+        return {
+            module: ConfigurationModule,
+            imports: [
+                ConfigModule.forRoot({
+                    isGlobal: true,
+                    load: [configuration]
+                })
+            ]
+        }
+    }
+}

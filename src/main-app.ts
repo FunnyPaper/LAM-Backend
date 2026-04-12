@@ -8,33 +8,46 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { CommandModule } from './commands/command.module';
 import { InitCommand } from './commands/init.command';
 import { DataSource } from 'typeorm';
+import cookieParser from 'cookie-parser';
+import configurationCli from './configuration/configuration.cli';
+import { ConfigurationType } from './configuration/types/configuration.type';
+import configuration from './configuration/configuration';
+import { resolve } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const [argv, conf] = await configurationCli();
+    const app = await NestFactory.create<NestExpressApplication>(AppModule.register(conf));
 
-  const dataSource = app.get(DataSource);
-  await dataSource.runMigrations();
+    const dataSource = app.get(DataSource);
+    await dataSource.runMigrations();
 
-  const commandContext = await NestFactory.createApplicationContext(CommandModule);
-  const initCommand = commandContext.get(InitCommand);
-  await initCommand.run();
-  await commandContext.close();
+    const commandContext = await NestFactory.createApplicationContext(
+        CommandModule.register(() => configuration(resolve(argv.cwd ?? process.cwd(), '.env')))
+    );
+    const initCommand = commandContext.get(InitCommand);
+    await initCommand.run();
+    await commandContext.close();
 
-  app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
-  app.useGlobalFilters(new DomainErrorFilter())
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    transformOptions: { enableImplicitConversion: true }
-  }))
-  app.set('query parser', 'extended');
+    app.use(cookieParser());
+    app.enableCors({
+        credentials: true
+    });
 
-  const configService: ConfigService = app.get(ConfigService);
-  const type: string = configService.get('type')!;
-  const port: string = process.env.NODE_PORT || '3000';
+    app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
+    app.useGlobalFilters(new DomainErrorFilter())
+    app.useGlobalPipes(new ValidationPipe({
+        transform: true,
+        whitelist: true,
+        transformOptions: { enableImplicitConversion: true }
+    }))
+    app.set('query parser', 'extended');
 
-  await app.listen(port);
-  console.log(`Running in mode ${type} on port ${port}`);
+    const configService: ConfigService<ConfigurationType> = app.get(ConfigService);
+    const type: string = configService.get('type')!;
+    const port: number = configService.get('port')!;
+
+    await app.listen(port);
+    console.log(`Running in mode ${type} on port ${port}`);
 }
 
 void bootstrap();

@@ -1,23 +1,23 @@
 {
-  "moduleFileExtensions": [
-    "js",
-    "json",
-    "ts"
-  ],
-  "rootDir": ".",
-  "testEnvironment": "node",
-  "testRegex": ".e2e-spec.ts$",
-  "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/../src/$1",
-    "^test/(.*)$": "<rootDir>/../test/$1"
-  },
-  "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  },
-  "setupFiles": [
-    "../jest.setup.js"
-  ],
-  "transformIgnorePatterns": [
-    "node_modules/(?!p-queue|p-timeout|eventemitter3)"
-  ]
+    "moduleFileExtensions": [
+        "js",
+        "json",
+        "ts"
+    ],
+    "rootDir": ".",
+    "testEnvironment": "node",
+    "testRegex": ".e2e-spec.ts$",
+    "moduleNameMapper": {
+        "^src/(.*)$": "<rootDir>/../src/$1",
+        "^test/(.*)$": "<rootDir>/../test/$1"
+    },
+    "transform": {
+        "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "setupFiles": [
+        "../jest.setup.js"
+    ],
+    "transformIgnorePatterns": [
+        "node_modules/(?!p-queue|p-timeout|eventemitter3)"
+    ]
 }

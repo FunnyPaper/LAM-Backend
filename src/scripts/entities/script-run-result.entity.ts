@@ -9,23 +9,23 @@ const jsonType = columnJsonType(process.env.DB_TYPE!);
 
 @Entity({ name: 'script-run-result' })
 export class ScriptRunResultEntity {
-  @PrimaryColumn('uuid')
-  scriptRunId: string;
+    @PrimaryColumn('uuid')
+    scriptRunId!: string;
 
-  @OneToOne(() => ScriptRunEntity, (run) => run.result, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'scriptRunId' })
-  scriptRun: ScriptRunEntity;
+    @OneToOne(() => ScriptRunEntity, (run) => run.result, {
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn({ name: 'scriptRunId' })
+    scriptRun!: ScriptRunEntity;
 
-  @Column({ type: jsonType, nullable: true })
-  data?: Record<string, any>;
+    @Column({ type: jsonType, nullable: true })
+    data?: Record<string, any>;
 
-  @CreateDateColumn(dateOptions)
-  @Type(() => Date)
-  createdAt: Date;
+    @CreateDateColumn(dateOptions)
+    @Type(() => Date)
+    createdAt!: Date;
 
-  @UpdateDateColumn(dateOptions)
-  @Type(() => Date)
-  updatedAt: Date;
+    @UpdateDateColumn(dateOptions)
+    @Type(() => Date)
+    updatedAt!: Date;
 }

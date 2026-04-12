@@ -29,225 +29,225 @@ import { ScriptsRunsProcessor } from './processors/scripts-runs.processor';
 
 @Injectable()
 export class ScriptsRunsService {
-  public constructor(
-    @InjectRepository(ScriptRunEntity)
-    private readonly scriptsRunsRepo: Repository<ScriptRunEntity>,
-    @InjectRepository(ScriptRunResultEntity)
-    private readonly scriptsRunsResultsRepo: Repository<ScriptRunResultEntity>,
-    private readonly scriptsVersionsService: ScriptsVersionsService,
-    private readonly usersService: UsersService,
-    private readonly envService: EnvService,
-    private readonly authService: AuthService,
-    private readonly scriptRunsProcessor: ScriptsRunsProcessor
-  ) {}
+    public constructor(
+        @InjectRepository(ScriptRunEntity)
+        private readonly scriptsRunsRepo: Repository<ScriptRunEntity>,
+        @InjectRepository(ScriptRunResultEntity)
+        private readonly scriptsRunsResultsRepo: Repository<ScriptRunResultEntity>,
+        private readonly scriptsVersionsService: ScriptsVersionsService,
+        private readonly usersService: UsersService,
+        private readonly envService: EnvService,
+        private readonly authService: AuthService,
+        private readonly scriptRunsProcessor: ScriptsRunsProcessor
+    ) { }
 
-  public async create(userId: string, dto: CreateScriptRunDto): Promise<ScriptRunEntity> {
-    const user = await this.usersService.findById(userId);
-    const scriptVersion = await this.scriptsVersionsService.findOneByUsersVersionId(userId, dto.scriptVersionId);
+    public async create(userId: string, dto: CreateScriptRunDto): Promise<ScriptRunEntity> {
+        const user = await this.usersService.findById(userId);
+        const scriptVersion = await this.scriptsVersionsService.findOneByUsersVersionId(userId, dto.scriptVersionId);
 
-    if(scriptVersion.status != ScriptVersionStatusEnum.Published) {
-      throw new ScriptRunCreateFromUnpublishedError(userId, scriptVersion.id, scriptVersion.status);
-    }
-
-    let env: EnvEntity | undefined;
-    if(dto.envId) {
-      env = await this.envService.findById(userId, dto.envId);
-    }
-
-    const scriptRunResult = this.scriptsRunsResultsRepo.create({ data: {} });
-    const scriptRun = this.scriptsRunsRepo.create({
-      ...dto,
-      env: env,
-      envSnapshot: env && plainToInstance(EnvSnapshotDto, env),
-      scriptVersion: scriptVersion,
-      scriptVersionSnapshot: plainToInstance(ScriptVersionSnapshotDto, scriptVersion),
-      createdBy: user,
-      result: scriptRunResult
-    });
-
-    const run = await this.scriptsRunsRepo.save(scriptRun);
-
-    this.scriptRunsProcessor.enqueueStartJob(
-        run.id,
-        userId,
-        scriptVersion.content.astJson!,
-        env?.data
-    );
-
-    return run;
-  }
-
-  public findAll(userId: string, dto: QueryScriptRunDto): Promise<ScriptRunEntity[] | PaginatedScriptRunDto> {
-    return dto.pagination
-      // Typescript is dumb enough to not take narrowing into account here
-      ? this.findAllPaginated(userId, <Require<QueryScriptRunDto, 'pagination'>>dto)
-      : this.findAllNonPaginated(userId, dto);
-  }
-
-  public findAllNonPaginated(userId: string, dto: QueryScriptRunDto): Promise<ScriptRunEntity[]> {
-    const where = this.parseWhere(userId, dto);
-    const relations = this.parseRelations(userId, dto);
-    const order = this.parseOrder(userId, dto);
-
-    return this.scriptsRunsRepo.find({ where, order, relations });
-  }
-
-  public async findAllPaginated(
-    userId: string, 
-    dto: Require<QueryScriptRunDto, 'pagination'>
-  ): Promise<PaginatedScriptRunDto> {
-    const where = this.parseWhere(userId, dto);
-    const relations = this.parseRelations(userId, dto);
-    const order = this.parseOrder(userId, dto);
-    const [take, skip] = this.parsePagination(dto.pagination);
-
-    const [data, totalItems] = await this.scriptsRunsRepo.findAndCount({ where, order, relations, take, skip });
-    return {
-      data,
-      metadata: {
-        page: dto.pagination.page,
-        limit: dto.pagination.limit,
-        totalItems: totalItems,
-        totalPages: Math.ceil(totalItems / dto.pagination.limit)
-      }
-    }
-  }
-
-  public async findById(userId: string, scriptRunId: string): Promise<ScriptRunEntity> {
-    const run = await this.scriptsRunsRepo.findOne({
-      where: {
-        id: scriptRunId,
-        createdBy: {
-          id: userId
+        if (scriptVersion.status != ScriptVersionStatusEnum.Published) {
+            throw new ScriptRunCreateFromUnpublishedError(userId, scriptVersion.id, scriptVersion.status);
         }
-      },
-      relations: {
-        result: true,
-        createdBy: true
-      }
-    });
 
-    if(!run) {
-      throw new ScriptRunNotFoundError(userId, scriptRunId);
+        let env: EnvEntity | undefined;
+        if (dto.envId) {
+            env = await this.envService.findById(userId, dto.envId);
+        }
+
+        const scriptRunResult = this.scriptsRunsResultsRepo.create({ data: {} });
+        const scriptRun = this.scriptsRunsRepo.create({
+            ...dto,
+            env: env,
+            envSnapshot: env && plainToInstance(EnvSnapshotDto, env),
+            scriptVersion: scriptVersion,
+            scriptVersionSnapshot: plainToInstance(ScriptVersionSnapshotDto, scriptVersion),
+            createdBy: user,
+            result: scriptRunResult
+        });
+
+        const run = await this.scriptsRunsRepo.save(scriptRun);
+
+        this.scriptRunsProcessor.enqueueStartJob(
+            run.id,
+            userId,
+            scriptVersion.content.astJson!,
+            env?.data
+        );
+
+        return run;
     }
 
-    return run;
-  }
-
-  public async remove(userId: string, scriptRunId: string): Promise<void> {
-    const run = await this.findById(userId, scriptRunId);
-    
-    if(run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running) {
-      throw new ScriptRunRemoveStatusError(userId, scriptRunId, run.status);
+    public findAll(userId: string, dto: QueryScriptRunDto): Promise<ScriptRunEntity[] | PaginatedScriptRunDto> {
+        return dto.pagination
+            // Typescript is dumb enough to not take narrowing into account here
+            ? this.findAllPaginated(userId, <Require<QueryScriptRunDto, 'pagination'>>dto)
+            : this.findAllNonPaginated(userId, dto);
     }
 
-    await this.scriptsRunsRepo.delete(run.id);
-  }
+    public findAllNonPaginated(userId: string, dto: QueryScriptRunDto): Promise<ScriptRunEntity[]> {
+        const where = this.parseWhere(userId, dto);
+        const relations = this.parseRelations(userId, dto);
+        const order = this.parseOrder(userId, dto);
 
-  public async cancel(userId: string, scriptRunId: string): Promise<ScriptRunEntity> {
-    const run = await this.findById(userId, scriptRunId);
-
-    if(!(run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running)) {
-      throw new ScriptRunCancelStatusError(userId, scriptRunId, run.status);
+        return this.scriptsRunsRepo.find({ where, order, relations });
     }
 
-    const token = this.authService.createGrpcToken(userId, ['run:cancel'], { runId: run.id });
-    await this.scriptRunsProcessor.cancelJob(run.id, token);
+    public async findAllPaginated(
+        userId: string,
+        dto: Require<QueryScriptRunDto, 'pagination'>
+    ): Promise<PaginatedScriptRunDto> {
+        const where = this.parseWhere(userId, dto);
+        const relations = this.parseRelations(userId, dto);
+        const order = this.parseOrder(userId, dto);
+        const [take, skip] = this.parsePagination(dto.pagination);
 
-    return this.scriptsRunsRepo.save({
-      ...run,
-      status: ScriptRunStatusEnum.Cancelled
-    });
-  }
-
-  public async reexecute(userId: string, scriptRunId: string, dto: ReexecuteScriptRunDto): Promise<ScriptRunEntity> {
-    const run = await this.findById(userId, scriptRunId);
-
-    if(run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running) {
-      throw new ScriptRunReexecuteStatusError(userId, scriptRunId, run.status);
+        const [data, totalItems] = await this.scriptsRunsRepo.findAndCount({ where, order, relations, take, skip });
+        return {
+            data,
+            metadata: {
+                page: dto.pagination.page,
+                limit: dto.pagination.limit,
+                totalItems: totalItems,
+                totalPages: Math.ceil(totalItems / dto.pagination.limit)
+            }
+        }
     }
 
-    const env = dto.envId && await this.envService.tryFindById(userId, dto.envId);
+    public async findById(userId: string, scriptRunId: string): Promise<ScriptRunEntity> {
+        const run = await this.scriptsRunsRepo.findOne({
+            where: {
+                id: scriptRunId,
+                createdBy: {
+                    id: userId
+                }
+            },
+            relations: {
+                result: true,
+                createdBy: true
+            }
+        });
 
-    const newRun = this.scriptsRunsRepo.create({
-      ...run,
-      id: undefined,
-      result: undefined,
-      status: ScriptRunStatusEnum.Queued,
-      ...(env && {
-        env: env,
-        envSnapshot: env && plainToInstance(EnvSnapshotDto, env)
-      })
-    });
+        if (!run) {
+            throw new ScriptRunNotFoundError(userId, scriptRunId);
+        }
 
-    return this.scriptsRunsRepo.save(newRun);
-  }
-
-  private parseRelations(userId: string, dto: QueryScriptRunDto): FindOptionsRelations<ScriptRunEntity> {
-    const { scriptId, scriptVersionId } = dto.filtering || {};
-    const relations: FindOptionsRelations<ScriptRunEntity> = {};
-
-    if(scriptVersionId) {
-      relations.scriptVersion = true;
+        return run;
     }
 
-    if(scriptId) {
-      relations.scriptVersion = { script: true };
+    public async remove(userId: string, scriptRunId: string): Promise<void> {
+        const run = await this.findById(userId, scriptRunId);
+
+        if (run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running) {
+            throw new ScriptRunRemoveStatusError(userId, scriptRunId, run.status);
+        }
+
+        await this.scriptsRunsRepo.delete(run.id);
     }
 
-    return {
-      createdBy: true,
-      ...relations
-    }
-  }
+    public async cancel(userId: string, scriptRunId: string): Promise<ScriptRunEntity> {
+        const run = await this.findById(userId, scriptRunId);
 
-  private parseWhere(userId: string, dto: QueryScriptRunDto): FindOptionsWhere<ScriptRunEntity> {
-    // NOTE: Intellisense and Typescript loses type shape context
-    // each "object level" needs to be casted
-    
-    const { scriptId, scriptVersionId } = dto.filtering || {};
-    const filters: FindOptionsWhere<ScriptRunEntity> = {};
-    
-    if(scriptId) {
-      filters.scriptVersion ??= {};
-      (<FindOptionsWhere<ScriptVersionEntity>>
-        filters.scriptVersion
-      ).id = scriptVersionId;
+        if (!(run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running)) {
+            throw new ScriptRunCancelStatusError(userId, scriptRunId, run.status);
+        }
+
+        const token = this.authService.createGrpcToken(userId, ['run:cancel'], { runId: run.id });
+        await this.scriptRunsProcessor.cancelJob(run.id, token);
+
+        return this.scriptsRunsRepo.save({
+            ...run,
+            status: ScriptRunStatusEnum.Cancelled
+        });
     }
 
-    if(scriptVersionId) {
-      filters.scriptVersion ??= {};
-      (<FindOptionsWhere<ScriptEntity>>
-        (<FindOptionsWhere<ScriptVersionEntity>>
-          filters.scriptVersion
-        ).script) ??= {};
+    public async reexecute(userId: string, scriptRunId: string, dto: ReexecuteScriptRunDto): Promise<ScriptRunEntity> {
+        const run = await this.findById(userId, scriptRunId);
 
-      (<FindOptionsWhere<ScriptEntity>>
-        (<FindOptionsWhere<ScriptVersionEntity>>
-          filters.scriptVersion
-        ).script
-      ).id = scriptId
+        if (run.status == ScriptRunStatusEnum.Queued || run.status == ScriptRunStatusEnum.Running) {
+            throw new ScriptRunReexecuteStatusError(userId, scriptRunId, run.status);
+        }
+
+        const env = dto.envId && await this.envService.tryFindById(userId, dto.envId);
+
+        const newRun = this.scriptsRunsRepo.create({
+            ...run,
+            id: undefined,
+            result: undefined,
+            status: ScriptRunStatusEnum.Queued,
+            ...(env && {
+                env: env,
+                envSnapshot: env && plainToInstance(EnvSnapshotDto, env)
+            })
+        });
+
+        return this.scriptsRunsRepo.save(newRun);
     }
 
-    return {
-      createdBy: {
-        id: userId
-      },
-      ...filters
-    };
-  }
+    private parseRelations(userId: string, dto: QueryScriptRunDto): FindOptionsRelations<ScriptRunEntity> {
+        const { scriptId, scriptVersionId } = dto.filtering || {};
+        const relations: FindOptionsRelations<ScriptRunEntity> = {};
 
-  private parseOrder(userId: string, dto: QueryScriptRunDto): FindOptionsOrder<ScriptRunEntity> {    
-    const order: FindOptionsOrder<ScriptRunEntity> = {};
+        if (scriptVersionId) {
+            relations.scriptVersion = true;
+        }
 
-    if(dto.sorting) {
-      order[dto.sorting.sortBy] = { direction: dto.sorting.order };
+        if (scriptId) {
+            relations.scriptVersion = { script: true };
+        }
+
+        return {
+            createdBy: true,
+            ...relations
+        }
     }
 
-    return order;
-  }
+    private parseWhere(userId: string, dto: QueryScriptRunDto): FindOptionsWhere<ScriptRunEntity> {
+        // NOTE: Intellisense and Typescript loses type shape context
+        // each "object level" needs to be casted
 
-  private parsePagination(dto: NonNullable<QueryScriptRunDto['pagination']>): [number, number] {
-    return [dto.limit, (dto.page - 1) * dto.limit];
-  }
+        const { scriptId, scriptVersionId } = dto.filtering || {};
+        const filters: FindOptionsWhere<ScriptRunEntity> = {};
+
+        if (scriptId) {
+            filters.scriptVersion ??= {};
+            (<FindOptionsWhere<ScriptVersionEntity>>
+                filters.scriptVersion
+            ).id = scriptVersionId;
+        }
+
+        if (scriptVersionId) {
+            filters.scriptVersion ??= {};
+            (<FindOptionsWhere<ScriptEntity>>
+                (<FindOptionsWhere<ScriptVersionEntity>>
+                    filters.scriptVersion
+                ).script) ??= {};
+
+            (<FindOptionsWhere<ScriptEntity>>
+                (<FindOptionsWhere<ScriptVersionEntity>>
+                    filters.scriptVersion
+                ).script
+            ).id = scriptId
+        }
+
+        return {
+            createdBy: {
+                id: userId
+            },
+            ...filters
+        };
+    }
+
+    private parseOrder(userId: string, dto: QueryScriptRunDto): FindOptionsOrder<ScriptRunEntity> {
+        const order: FindOptionsOrder<ScriptRunEntity> = {};
+
+        if (dto.sorting) {
+            order[dto.sorting.sortBy] = { direction: dto.sorting.order };
+        }
+
+        return order;
+    }
+
+    private parsePagination(dto: NonNullable<QueryScriptRunDto['pagination']>): [number, number] {
+        return [dto.limit, (dto.page - 1) * dto.limit];
+    }
 }

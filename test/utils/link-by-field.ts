@@ -10,20 +10,20 @@
  * @returns Parents and children after all links have been performed.
  */
 export default function linkByField<T0, T1>(
-  parents: T0[],
-  childrens: T1[],
-  parentField: keyof T0,
-  childField: keyof T1,
-  link: (parent: T0, child: T1) => void
+    parents: T0[],
+    childrens: T1[],
+    parentField: keyof T0,
+    childField: keyof T1,
+    link: (parent: T0, child: T1) => void
 ): [T0[], T1[]] {
-  const map = new Map<unknown, T0>(
-    parents.map(parent => [parent[parentField], parent])
-  );
+    const map = new Map<unknown, T0>(
+        parents.map(parent => [parent[parentField], parent])
+    );
 
-  childrens.forEach(child => {
-    const parent = map.get(child[childField]);
-    if (parent) link(parent, child);
-  })
+    childrens.forEach(child => {
+        const parent = map.get(child[childField]);
+        if (parent) link(parent, child);
+    })
 
-  return [parents, childrens];
+    return [parents, childrens];
 }

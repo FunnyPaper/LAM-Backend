@@ -11,18 +11,18 @@ const jsonType = columnJsonType(process.env.DB_TYPE!);
 @Entity({ name: 'env' })
 export class EnvEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => UserEntity, (owner) => owner.envs, {
     onDelete: 'CASCADE'
   })
-  owner: UserEntity;
+  owner!: UserEntity;
 
   @OneToMany(() => ScriptRunEntity, (run) => run.env)
-  runs: ScriptRunEntity[];
+  runs!: ScriptRunEntity[];
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ type: 'varchar', nullable: true })
   description?: string;
@@ -32,9 +32,9 @@ export class EnvEntity {
 
   @CreateDateColumn(dateOptions)
   @Type(() => Date)
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn(dateOptions)
   @Type(() => Date)
-  updatedAt: Date;
+  updatedAt!: Date;
 }

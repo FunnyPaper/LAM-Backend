@@ -19,105 +19,105 @@ import { plainToInstance } from 'class-transformer';
 @ApiQuery({ name: 'userId', type: String, required: false })
 @Controller('scripts/:scriptId/versions')
 export class ScriptsVersionsController {
-  constructor(private readonly scriptsVersionsService: ScriptsVersionsService) {}
+    constructor(private readonly scriptsVersionsService: ScriptsVersionsService) { }
 
-  @SerializeOptions({ type: ScriptVersionDto })
-  @UseRoles({ resource: 'scripts-versions', action: 'create', possession: 'own' })
-  @Post()
-  create(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Body() dto: CreateScriptVersionDto
-  ) {
-    return this.scriptsVersionsService.create(userId, scriptId, dto);
-  }
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'create', possession: 'own' })
+    @Post()
+    create(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Body() dto: CreateScriptVersionDto
+    ) {
+        return this.scriptsVersionsService.create(userId, scriptId, dto);
+    }
 
-  @SerializeOptions({ type: ScriptVersionDto })
-  @UseRoles({ resource: 'scripts-versions', action: 'read', possession: 'own' })
-  @Get(':scriptVersionId')
-  findOne(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Param('scriptVersionId') scriptVersionId: string
-  ) {
-    return this.scriptsVersionsService.findById(userId, scriptId, scriptVersionId);
-  }
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'read', possession: 'own' })
+    @Get(':scriptVersionId')
+    findOne(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string
+    ) {
+        return this.scriptsVersionsService.findById(userId, scriptId, scriptVersionId);
+    }
 
-  @SerializeOptions({ excludeExtraneousValues: true })
-  @UseRoles({ resource: 'scripts-versions', action: 'read', possession: 'own' })
-  @ApiDeepQuery('filtering', ScriptVersionFilterDto)
-  @ApiDeepQuery('sorting', ScriptVersionSortDto)
-  @ApiDeepQuery('pagination', PaginationDto)
-  @ApiExtraModels(ScriptVersionDto, PaginatedScriptVersionDto)
-  @ApiOkResponse({
-    schema: {
-      oneOf: [
-        {
-          type: 'array',
-          items: { $ref: getSchemaPath(ScriptVersionDto) }
-        },
-        {
-          $ref: getSchemaPath(PaginatedScriptVersionDto)
+    @SerializeOptions({ excludeExtraneousValues: true })
+    @UseRoles({ resource: 'scripts-versions', action: 'read', possession: 'own' })
+    @ApiDeepQuery('filtering', ScriptVersionFilterDto)
+    @ApiDeepQuery('sorting', ScriptVersionSortDto)
+    @ApiDeepQuery('pagination', PaginationDto)
+    @ApiExtraModels(ScriptVersionDto, PaginatedScriptVersionDto)
+    @ApiOkResponse({
+        schema: {
+            oneOf: [
+                {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(ScriptVersionDto) }
+                },
+                {
+                    $ref: getSchemaPath(PaginatedScriptVersionDto)
+                }
+            ]
         }
-      ]
+    })
+    @Get()
+    async findAll(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Query() dto: QueryScriptVersionDto
+    ): Promise<ScriptVersionDto[] | PaginatedScriptVersionDto> {
+        const results = await this.scriptsVersionsService.findAll(userId, scriptId, dto);
+
+        if ('metadata' in results) {
+            return plainToInstance(PaginatedScriptVersionDto, results, { excludeExtraneousValues: true });
+        }
+
+        return plainToInstance(ScriptVersionDto, results, { excludeExtraneousValues: true });
     }
-  })
-  @Get()
-  async findAll(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Query() dto: QueryScriptVersionDto
-  ): Promise<ScriptVersionDto[] | PaginatedScriptVersionDto> {
-    const results = await this.scriptsVersionsService.findAll(userId, scriptId, dto);
 
-    if('metadata' in results) {
-      return plainToInstance(PaginatedScriptVersionDto, results, { excludeExtraneousValues: true });
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'update', possession: 'own' })
+    @Put(':scriptVersionId')
+    update(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string,
+        @Body() dto: UpdateScriptVersionDto
+    ) {
+        return this.scriptsVersionsService.update(userId, scriptId, scriptVersionId, dto);
     }
 
-    return plainToInstance(ScriptVersionDto, results, { excludeExtraneousValues: true });
-  }
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'create', possession: 'own' })
+    @Post(':scriptVersionId/fork')
+    fork(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string,
+    ) {
+        return this.scriptsVersionsService.fork(userId, scriptId, scriptVersionId);
+    }
 
-  @SerializeOptions({ type: ScriptVersionDto })
-  @UseRoles({ resource: 'scripts-versions', action: 'update', possession: 'own' })
-  @Put(':scriptVersionId')
-  update(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Param('scriptVersionId') scriptVersionId: string,
-    @Body() dto: UpdateScriptVersionDto
-  ) {
-    return this.scriptsVersionsService.update(userId, scriptId, scriptVersionId, dto);
-  }
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'update', possession: 'own' })
+    @Patch(':scriptVersionId/publish')
+    publish(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string,
+    ) {
+        return this.scriptsVersionsService.publish(userId, scriptId, scriptVersionId);
+    }
 
-  @SerializeOptions({ type: ScriptVersionDto })
-  @UseRoles({ resource: 'scripts-versions', action: 'create', possession: 'own' })
-  @Post(':scriptVersionId/fork')
-  fork(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Param('scriptVersionId') scriptVersionId: string,
-  ) {
-    return this.scriptsVersionsService.fork(userId, scriptId, scriptVersionId);
-  }
-
-  @SerializeOptions({ type: ScriptVersionDto })
-  @UseRoles({ resource: 'scripts-versions', action: 'update', possession: 'own' })
-  @Patch(':scriptVersionId/publish')
-  publish(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Param('scriptVersionId') scriptVersionId: string,
-  ) {
-    return this.scriptsVersionsService.publish(userId, scriptId, scriptVersionId);
-  }
-
-  @UseRoles({ resource: 'scripts-versions', action: 'delete', possession: 'own' })
-  @Delete(':scriptVersionId')
-  remove(
-    @RequestUserId() userId: string,
-    @Param('scriptId') scriptId: string,
-    @Param('scriptVersionId') scriptVersionId: string,
-  ) {
-    return this.scriptsVersionsService.remove(userId, scriptId, scriptVersionId);
-  }
+    @UseRoles({ resource: 'scripts-versions', action: 'delete', possession: 'own' })
+    @Delete(':scriptVersionId')
+    remove(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string,
+    ) {
+        return this.scriptsVersionsService.remove(userId, scriptId, scriptVersionId);
+    }
 }

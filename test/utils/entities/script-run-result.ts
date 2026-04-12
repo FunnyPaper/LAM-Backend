@@ -3,6 +3,6 @@ import { ScriptRunResultEntity } from "src/scripts/entities/script-run-result.en
 import { FakeScriptRun } from "./script-run";
 
 export class FakeScriptRunResult extends OmitType(ScriptRunResultEntity, ['scriptRun', 'scriptRunId']) {
-  scriptRun?: FakeScriptRun;
-  scriptRunId?: string;
+    scriptRun?: FakeScriptRun;
+    scriptRunId?: string;
 }

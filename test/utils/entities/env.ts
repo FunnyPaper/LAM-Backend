@@ -4,6 +4,6 @@ import { FakeUser } from "./user";
 import { FakeScriptRun } from "./script-run";
 
 export class FakeEnv extends OmitType(EnvEntity, ['owner', 'runs']) {
-  owner?: FakeUser;
-  runs?: FakeScriptRun[];
+    owner?: FakeUser;
+    runs?: FakeScriptRun[];
 }

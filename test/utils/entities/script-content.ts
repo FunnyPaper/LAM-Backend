@@ -3,6 +3,6 @@ import { ScriptContentEntity } from "src/scripts/entities/script-content.entity"
 import { FakeScriptVersion } from "./script-version";
 
 export class FakeScriptContent extends OmitType(ScriptContentEntity, ['scriptVersion', 'scriptVersionId']) {
-  scriptVersion?: FakeScriptVersion;
-  scriptVersionId?: string;
+    scriptVersion?: FakeScriptVersion;
+    scriptVersionId?: string;
 }

@@ -9,29 +9,29 @@ const jsonType = columnJsonType(process.env.DB_TYPE!);
 
 @Entity({ name: 'script-content' })
 export class ScriptContentEntity {
-  @PrimaryColumn('uuid')
-  scriptVersionId: string;
+    @PrimaryColumn('uuid')
+    scriptVersionId!: string;
 
-  @OneToOne(() => ScriptVersionEntity, (version) => version.content, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({ name: 'scriptVersionId' })
-  scriptVersion: ScriptVersionEntity;
+    @OneToOne(() => ScriptVersionEntity, (version) => version.content, {
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn({ name: 'scriptVersionId' })
+    scriptVersion!: ScriptVersionEntity;
 
-  @Column({ type: jsonType, nullable: true })
-  astJson?: Record<string, any>;
+    @Column({ type: jsonType, nullable: true })
+    astJson?: Record<string, any>;
 
-  @Column()
-  astVersion: number;
+    @Column()
+    astVersion!: number;
 
-  @Column()
-  engineVersion: number;
+    @Column()
+    engineVersion!: number;
 
-  @CreateDateColumn(dateOptions)
-  @Type(() => Date)
-  createdAt: Date;
+    @CreateDateColumn(dateOptions)
+    @Type(() => Date)
+    createdAt!: Date;
 
-  @UpdateDateColumn(dateOptions)
-  @Type(() => Date)
-  updatedAt: Date;
+    @UpdateDateColumn(dateOptions)
+    @Type(() => Date)
+    updatedAt!: Date;
 }

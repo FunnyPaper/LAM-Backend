@@ -5,13 +5,13 @@ import { IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 
 export class UpdateScriptVersionDto {
-  @ApiProperty()
-  @IsOptional()
-  @Type(() => UpdateScriptContentDto)
-  content?: UpdateScriptContentDto;
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => UpdateScriptContentDto)
+    content?: UpdateScriptContentDto;
 
-  @ApiProperty()
-  @IsOptional()
-  @Type(() => UpdateScriptSourceDto)
-  source?: UpdateScriptSourceDto;
+    @ApiProperty()
+    @IsOptional()
+    @Type(() => UpdateScriptSourceDto)
+    source?: UpdateScriptSourceDto;
 }

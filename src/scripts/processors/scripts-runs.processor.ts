@@ -9,6 +9,8 @@ import { ScriptRunEntity } from "../entities/script-run.entity";
 import { Repository } from "typeorm";
 import { ScriptRunResultEntity } from "../entities/script-run-result.entity";
 import { AuthService } from "src/auth/auth.service";
+import { ConfigService } from "@nestjs/config";
+import { ConfigurationType, ScriptsConfiguration } from "src/configuration/types/configuration.type";
 
 const statusMapper = {
     [JobStatus.CANCELLED]: ScriptRunStatusEnum.Cancelled,
@@ -34,9 +36,11 @@ export class ScriptsRunsProcessor {
         private readonly grpcClientService: ScriptsRunsGrpcClientService,
         private readonly gateway: ScriptRunGateway,
         private readonly authService: AuthService,
+        configService: ConfigService<ConfigurationType>
     ) {
+        const scripts: ScriptsConfiguration = configService.get('scripts')!;
         this.queue = new PQueue({
-            concurrency: parseInt(process.env.SCRIPT_RUNS_CONCURRENCY ?? "1")
+            concurrency: scripts.concurrency
         });
 
         this.pendingRuns = new Set();
@@ -59,7 +63,7 @@ export class ScriptsRunsProcessor {
         script: Record<string, any>,
         env: Record<string, any> | undefined
     ) {
-        if(!this.pendingRuns.has(runId)) return; 
+        if (!this.pendingRuns.has(runId)) return;
 
         const token = this.authService.createGrpcToken(userId, ['run:start'], { runId: runId });
         const stream = this.grpcClientService.startJob(runId, script, env, token);

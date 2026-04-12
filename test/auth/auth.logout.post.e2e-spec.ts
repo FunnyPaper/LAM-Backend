@@ -9,47 +9,47 @@ import { clearDB } from 'test/utils/database';
 import { testTypes } from 'test/utils/testTypes';
 
 describe.each(testTypes())(`${AuthController.name} (e2e) (%s)`, (type) => {
-  let app: INestApplication<App>;
-  let container: StartedPostgreSqlContainer | null;
+    let app: INestApplication<App>;
+    let container: StartedPostgreSqlContainer | null;
 
-  beforeAll(async () => {
-    [app, container] = await setupApp(type);
-  }, 60000);
+    beforeAll(async () => {
+        [app, container] = await setupApp(type);
+    }, 60000);
 
-  afterAll(async () => {
-    await app?.close();
-    await container?.stop();
-  });
-
-  afterEach(async () => {
-    if(app) {
-      await clearDB(app, type);
-    }
-  })
-
-  beforeEach(() => {
-    expect(app).toBeDefined();
-  })
-
-  describe("/auth/logout (POST)", () => {
-    it('should revoke token', async () => {
-      const username = process.env.INITIAL_ADMIN_USERNAME!;
-      const password = process.env.INITIAL_ADMIN_PASSWORD!;
-
-      await request(app.getHttpServer())
-        .post('/auth/logout')
-        .send()
-        .expect(HttpStatus.UNAUTHORIZED);
-
-      const response = await login(app, { username, password });
-
-      const res = await request(app.getHttpServer())
-        .post('/auth/logout')
-        .set("Authorization", `Bearer ${response.body.accessToken}`)
-        .send()
-        .expect(HttpStatus.CREATED);
-        
-      expect(res.body).toMatchObject({ message: 'Token revoked' });
+    afterAll(async () => {
+        await app?.close();
+        await container?.stop();
     });
-  })
+
+    afterEach(async () => {
+        if (app) {
+            await clearDB(app, type);
+        }
+    })
+
+    beforeEach(() => {
+        expect(app).toBeDefined();
+    })
+
+    describe("/auth/logout (POST)", () => {
+        it('should revoke token', async () => {
+            const username = process.env.INITIAL_ADMIN_USERNAME!;
+            const password = process.env.INITIAL_ADMIN_PASSWORD!;
+
+            await request(app.getHttpServer())
+                .post('/auth/logout')
+                .send()
+                .expect(HttpStatus.UNAUTHORIZED);
+
+            const response = await login(app, { username, password });
+
+            const res = await request(app.getHttpServer())
+                .post('/auth/logout')
+                .set("Authorization", `Bearer ${response.body.accessToken}`)
+                .send()
+                .expect(HttpStatus.CREATED);
+
+            expect(res.body).toMatchObject({ message: 'Token revoked' });
+        });
+    })
 });

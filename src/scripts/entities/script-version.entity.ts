@@ -13,34 +13,34 @@ const enumType = columnEnumType(process.env.DB_TYPE!);
 
 @Entity({ name: 'script-version' })
 export class ScriptVersionEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn('uuid')
+    id!: string;
 
-  @ManyToOne(() => ScriptEntity, (script) => script.versions, {
-    onDelete: 'CASCADE'
-  })
-  script: ScriptEntity;
+    @ManyToOne(() => ScriptEntity, (script) => script.versions, {
+        onDelete: 'CASCADE'
+    })
+    script!: ScriptEntity;
 
-  @OneToOne(() => ScriptContentEntity, (content) => content.scriptVersion, {
-    cascade: true
-  })
-  content: ScriptContentEntity;
+    @OneToOne(() => ScriptContentEntity, (content) => content.scriptVersion, {
+        cascade: true
+    })
+    content!: ScriptContentEntity;
 
-  @OneToOne(() => ScriptSourceEntity, (content) => content.scriptVersion, {
-    cascade: true
-  })
-  source: ScriptSourceEntity;
+    @OneToOne(() => ScriptSourceEntity, (content) => content.scriptVersion, {
+        cascade: true
+    })
+    source!: ScriptSourceEntity;
 
-  @OneToMany(() => ScriptRunEntity, (run) => run.scriptVersion)
-  runs: ScriptRunEntity[];
+    @OneToMany(() => ScriptRunEntity, (run) => run.scriptVersion)
+    runs!: ScriptRunEntity[];
 
-  @Column()
-  versionNumber: number;
+    @Column()
+    versionNumber!: number;
 
-  @Column({ type: enumType, enum: ScriptVersionStatusEnum, default: ScriptVersionStatusEnum.Draft })
-  status: ScriptVersionStatusEnum;
+    @Column({ type: enumType, enum: ScriptVersionStatusEnum, default: ScriptVersionStatusEnum.Draft })
+    status!: ScriptVersionStatusEnum;
 
-  @CreateDateColumn(dateOptions)
-  @Type(() => Date)
-  createdAt: Date;
+    @CreateDateColumn(dateOptions)
+    @Type(() => Date)
+    createdAt!: Date;
 }

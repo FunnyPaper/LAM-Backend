@@ -4,20 +4,20 @@ import { ScriptVersionStatusEnum } from "../enums/script-version-status.enum";
 import { Expose, Type } from "class-transformer";
 
 export class ScriptVersionSnapshotDto {
-  @Expose()
-  status: ScriptVersionStatusEnum;
-  
-  @Expose()
-  versionNumber: number;
-  
-  @Expose()
-  createdAt: Date;
-  
-  @Expose()
-  @Type(() => ScriptContentSnapshotDto)
-  content: ScriptContentSnapshotDto;
-  
-  @Expose()
-  @Type(() => ScriptSourceSnapshotDto)
-  source: ScriptSourceSnapshotDto;
+    @Expose()
+    status!: ScriptVersionStatusEnum;
+
+    @Expose()
+    versionNumber!: number;
+
+    @Expose()
+    createdAt!: Date;
+
+    @Expose()
+    @Type(() => ScriptContentSnapshotDto)
+    content!: ScriptContentSnapshotDto;
+
+    @Expose()
+    @Type(() => ScriptSourceSnapshotDto)
+    source!: ScriptSourceSnapshotDto;
 }

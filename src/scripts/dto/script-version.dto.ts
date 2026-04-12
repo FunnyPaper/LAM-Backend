@@ -5,30 +5,30 @@ import { ScriptContentDto } from "./script-content.dto";
 import { ScriptSourceDto } from "./script-source.dto";
 
 export class ScriptVersionDto {
-  @ApiProperty()
-  @Expose()
-  id: string;
+    @ApiProperty()
+    @Expose()
+    id!: string;
 
-  @ApiProperty()
-  @Expose()
-  @Type(() => ScriptContentDto)
-  content: ScriptContentDto;
+    @ApiProperty()
+    @Expose()
+    @Type(() => ScriptContentDto)
+    content!: ScriptContentDto;
 
-  @ApiProperty()
-  @Expose()
-  @Type(() => ScriptSourceDto) 
-  source: ScriptSourceDto;
+    @ApiProperty()
+    @Expose()
+    @Type(() => ScriptSourceDto)
+    source!: ScriptSourceDto;
 
-  @ApiProperty()
-  @Expose()
-  versionNumber: number;
+    @ApiProperty()
+    @Expose()
+    versionNumber!: number;
 
-  @ApiProperty({ enum: ScriptVersionStatusEnum })
-  @Expose()
-  status: ScriptVersionStatusEnum;
+    @ApiProperty({ enum: ScriptVersionStatusEnum })
+    @Expose()
+    status!: ScriptVersionStatusEnum;
 
-  @ApiProperty()
-  @Expose()
-  @Type(() => Date)
-  createdAt: Date;
+    @ApiProperty()
+    @Expose()
+    @Type(() => Date)
+    createdAt!: Date;
 }

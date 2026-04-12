@@ -3,13 +3,13 @@ import { IdempotencyService } from './idempotency.service';
 import { IdempotencyInterceptor } from './idempotency.interceptor';
 
 @Module({
-  providers: [
-    IdempotencyService,
-    IdempotencyInterceptor,
-  ],
-  exports: [
-    IdempotencyInterceptor, 
-    IdempotencyService
-  ],
+    providers: [
+        IdempotencyService,
+        IdempotencyInterceptor,
+    ],
+    exports: [
+        IdempotencyInterceptor,
+        IdempotencyService
+    ],
 })
-export class IdempotencyModule {}
+export class IdempotencyModule { }

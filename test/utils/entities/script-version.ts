@@ -6,8 +6,8 @@ import { FakeScript } from "./script";
 import { FakeScriptSource } from "./script-source";
 
 export class FakeScriptVersion extends OmitType(ScriptVersionEntity, ['content', 'runs', 'script', 'source']) {
-  content?: FakeScriptContent;
-  runs?: FakeScriptRun[];
-  script?: FakeScript;
-  source?: FakeScriptSource;
+    content?: FakeScriptContent;
+    runs?: FakeScriptRun[];
+    script?: FakeScript;
+    source?: FakeScriptSource;
 }

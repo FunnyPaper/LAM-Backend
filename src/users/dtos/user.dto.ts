@@ -3,15 +3,15 @@ import { Expose } from "class-transformer";
 import { Role } from "../../app.roles";
 
 export class UserDto {
-  @ApiProperty()
-  @Expose()
-  id: string;
+    @ApiProperty()
+    @Expose()
+    id: string;
 
-  @ApiProperty()
-  @Expose()
-  username: string;
+    @ApiProperty()
+    @Expose()
+    username: string;
 
-  @ApiProperty({ enum: Role })
-  @Expose()
-  role: Role;
+    @ApiProperty({ enum: Role })
+    @Expose()
+    role: Role;
 }

@@ -6,10 +6,10 @@ import { FakeScript } from "./script";
 import { FakeScriptRun } from "./script-run";
 
 export class FakeUser extends OmitType(UserEntity, ['refreshToken', 'envs', 'scripts', 'scriptRuns']) {
-  refreshToken?: FakeRefreshToken;
-  refreshTokenId?: string;
-  unhashedPassword: string;
-  envs?: FakeEnv[];
-  scripts?: FakeScript[];
-  scriptRuns?: FakeScriptRun[];
+    refreshToken?: FakeRefreshToken;
+    refreshTokenId?: string;
+    unhashedPassword: string;
+    envs?: FakeEnv[];
+    scripts?: FakeScript[];
+    scriptRuns?: FakeScriptRun[];
 }

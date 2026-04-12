@@ -4,26 +4,26 @@ import { Role } from "src/app.roles";
 
 @Injectable()
 export class UserRequestIdGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest();
-    const user = req.user;
+    canActivate(context: ExecutionContext): boolean {
+        const req = context.switchToHttp().getRequest();
+        const user = req.user;
 
-    if (!user) {
-        throw new UnauthorizedException();
+        if (!user) {
+            throw new UnauthorizedException();
+        }
+
+        const queryUserId = req.query.userId;
+
+        if (!user.roles.includes(Role.ADMIN)) {
+            req.requestUserId = user.id;
+        } else if (!queryUserId || queryUserId == 'me') {
+            req.requestUserId = user.id;
+        } else if (!isUUID(queryUserId)) {
+            throw new UnprocessableEntityException();
+        } else {
+            req.requestUserId = queryUserId;
+        }
+
+        return true;
     }
-
-    const queryUserId = req.query.userId;
-
-    if (!user.roles.includes(Role.ADMIN)) {
-        req.requestUserId = user.id;
-    } else if(!queryUserId || queryUserId == 'me') {
-        req.requestUserId = user.id;
-    } else if(!isUUID(queryUserId)) {
-        throw new UnprocessableEntityException();
-    } else {
-        req.requestUserId = queryUserId;
-    }
-
-    return true;
-  }
 }

@@ -6,12 +6,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvEntity } from './entities/env.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([EnvEntity]),
-    UsersModule
-  ],
-  controllers: [EnvController],
-  providers: [EnvService],
-  exports: [EnvService]
+    imports: [
+        TypeOrmModule.forFeature([EnvEntity]),
+        UsersModule
+    ],
+    controllers: [EnvController],
+    providers: [EnvService],
+    exports: [EnvService]
 })
-export class EnvModule {}
+export class EnvModule { }
