@@ -15,7 +15,7 @@ import configuration from './configuration/configuration';
 import { resolve } from 'path';
 
 async function bootstrap() {
-    const [argv, conf] = await configurationCli();
+    const [argv, conf] = configurationCli();
     const app = await NestFactory.create<NestExpressApplication>(AppModule.register(conf));
 
     const dataSource = app.get(DataSource);

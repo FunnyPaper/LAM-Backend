@@ -11,7 +11,7 @@ jobs:
     build:
         strategy:
             matrix:
-                node-version: ["20.x", "21.x", "22.x"]
+                node-version: ["24.x"]
                 os: [ubuntu-latest]
         runs-on: ${{ matrix.os }}
         name: Build os-${{ matrix.os }} node-version-${{ matrix.node-version }}

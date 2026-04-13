@@ -1,11 +1,11 @@
 {
     "name": "@lam/backend",
-    "version": "0.4.2",
+    "version": "0.4.3",
     "description": "",
     "author": "",
     "private": true,
     "license": "UNLICENSED",
-    "main": "./dist/src/main.js",
+    "main": "./dist/src/main-app.js",
     "files": [
         "README.md",
         "LICENSE"
@@ -13,7 +13,7 @@
     "scripts": {
         "build": "nest build",
         "build:cli": "nest build && chmod +x ./dist/src/main-cli.js && npm link --force",
-        "build:ncc": "ncc build src/main-app.ts -o dist --source-map --minify",
+        "build:ncc": "ncc build src/main-app.ts -o dist --no-source-map-register",
         "build:windows:x64": "nexe dist/index.js --target windows-x64 --output lam-backend.exe --build --verbose",
         "build:windows:nsis": "makensis installer/installer.nsi",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -84,7 +84,7 @@
         "socket.io": "^4.8.3",
         "sqlite3": "^5.1.7",
         "typeorm": "0.3.27",
-        "yargs": "^18.0.0"
+        "yargs": "^16.0.0"
     },
     "devDependencies": {
         "@bufbuild/buf": "^1.62.1",
@@ -103,7 +103,7 @@
         "@types/passport-jwt": "^4.0.1",
         "@types/passport-local": "^1.0.38",
         "@types/supertest": "^6.0.2",
-        "@types/yargs": "^17.0.35",
+        "@types/yargs": "^16.0.0",
         "@vercel/ncc": "^0.38.4",
         "eslint": "^9.18.0",
         "eslint-config-prettier": "^10.0.1",

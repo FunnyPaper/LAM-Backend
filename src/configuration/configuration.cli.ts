@@ -3,8 +3,8 @@ import { hideBin } from 'yargs/helpers';
 import configuration from './configuration';
 import { resolve } from 'path';
 
-export default async () => {
-    const argv = await yargs(hideBin(process.argv))
+export default () => {
+    const argv = yargs(hideBin(process.argv))
         .scriptName("lam-backend")
         .version("0.1.0")
         .alias("v", "version")
@@ -36,16 +36,17 @@ export default async () => {
             description: "Secret used for generating short lived tokens."
         })
         .argv
+
     return [argv, () => {
         const defaults = configuration(resolve(argv.cwd ?? process.cwd(), '.env'));
         return {
             ...defaults,
-            port: argv['node-port'] as number ?? defaults.port,
+            port: argv['node-port'] as unknown as number ?? defaults.port,
             cwd: argv.cwd ?? defaults.cwd,
             grpc: {
                 ...defaults.grpc,
                 host: argv['grpc-host'] ?? defaults.grpc.host,
-                port: argv['grpc-port'] as number ?? defaults.grpc.port,
+                port: argv['grpc-port'] as unknown as number ?? defaults.grpc.port,
                 secret: argv['grpc-token-secret'] ?? defaults.grpc.secret
             }
         }
