@@ -18,7 +18,7 @@ export default () => {
         .option("node-port", {
             type: "number",
             default: process.env.NODE_PORT,
-            description: "Port number backend to start."
+            description: "Port number for backend to start."
         })
         .option("grpc-host", {
             type: "string",
@@ -34,6 +34,21 @@ export default () => {
             type: "string",
             default: process.env.GRPC_ACCESS_TOKEN_SECRET,
             description: "Secret used for generating short lived tokens."
+        })
+        .option("ack", {
+            type: "boolean",
+            default: false,
+            description: "Should the backend send a tcp ping once started."
+        })
+        .option("ack-host", {
+            type: "string",
+            default: "127.0.0.1",
+            description: "Host address to send ack ping to. Ignored if [ack] is set to false."
+        })
+        .option("ack-port", {
+            type: "number",
+            default: 9908,
+            description: "Port number to send ack ping to. Ignored if [ack] is set to false."
         })
         .argv
 

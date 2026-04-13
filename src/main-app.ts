@@ -13,6 +13,7 @@ import configurationCli from './configuration/configuration.cli';
 import { ConfigurationType } from './configuration/types/configuration.type';
 import configuration from './configuration/configuration';
 import { resolve } from 'path';
+import net from 'net';
 
 async function bootstrap() {
     const [argv, conf] = configurationCli();
@@ -46,8 +47,23 @@ async function bootstrap() {
     const type: string = configService.get('type')!;
     const port: number = configService.get('port')!;
 
-    await app.listen(port);
-    console.log(`Running in mode ${type} on port ${port}`);
+    const nestServer = await app.listen(port);
+    console.log(`Running in mode ${type} on port ${(nestServer.address() as net.AddressInfo).port}`);
+
+    // If ack is set then sends port informations through socket connection
+    if (argv.ack) {
+        const ackPort = argv['ack-port'];
+        const ackHost = argv['ack-host'];
+
+        const client = net.createConnection(
+            { port: ackPort, host: ackHost },
+            () => {
+                const nestPort = (nestServer.address() as net.AddressInfo).port;
+                client.write(`PORT=${nestPort}`);
+                client.end();
+            }
+        )
+    }
 }
 
 void bootstrap();
