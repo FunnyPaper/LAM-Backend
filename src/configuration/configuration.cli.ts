@@ -50,6 +50,11 @@ export default () => {
             default: 9908,
             description: "Port number to send ack ping to. Ignored if [ack] is set to false."
         })
+        .option('origin', {
+            type: 'array',
+            default: 'http://localhost:8080',
+            description: "Origin/-s used for cors setup."
+        })
         .argv
 
     return [argv, () => {

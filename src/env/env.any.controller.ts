@@ -10,14 +10,14 @@ import { UserOwnershipGuardFactory } from 'src/auth/guards/user-ownership.guard'
 import { plainToInstance } from 'class-transformer';
 import { ApiDeepQuery } from 'src/shared/decorators/api-deep-query';
 import { PaginationDto } from 'src/shared/dto/pagination.dto';
-import { EnvFilterDto, EnvSortDto, QueryEnvDto } from './dto/query-script.dto';
+import { EnvFilterDto, EnvSortDto, QueryEnvDto } from './dto/query-env.dto';
 import { PaginatedEnvDto } from './dto/paginated-env.dto';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, ACGuard, UserOwnershipGuardFactory('userId'))
 @ApiQuery({ name: 'userId', type: String, required: false })
 @Controller('users/:userId/envs')
-export class EnvController {
+export class EnvAnyController {
     constructor(private readonly envService: EnvService) { }
 
     @SerializeOptions({ type: EnvDto })

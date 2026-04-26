@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { LessThan, Repository } from 'typeorm';
@@ -11,6 +11,7 @@ import { UsernameTakenError } from 'src/users/errors/username-taken.error';
 import { InsufficientPrivilegesError } from 'src/auth/errors/insufficient-privileges.error';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType, InitConfiguration } from 'src/configuration/types/configuration.type';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -94,6 +95,19 @@ export class UsersService {
             password: init.superadmin.password,
             role: Role.ADMIN
         });
+    }
+
+    async updateById(id: string, { username, password }: UpdateUserDto) {
+        const user = await this.findById(id);
+
+        const isMatch = await this.hashService.compare(password, user.password);
+
+        if(!isMatch) {
+            throw new UnauthorizedException();
+        }
+
+        user.username = username;
+        return this.usersRepository.save(user);
     }
 
     async tryFindAdmin() {

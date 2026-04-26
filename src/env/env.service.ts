@@ -6,7 +6,7 @@ import { EnvEntity } from './entities/env.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
 import { EnvNotFoundError } from './errors/env-not-found.error';
-import { QueryEnvDto } from './dto/query-script.dto';
+import { QueryEnvDto } from './dto/query-env.dto';
 import { Require } from 'src/shared/types/require';
 import { PaginatedEnvDto } from './dto/paginated-env.dto';
 

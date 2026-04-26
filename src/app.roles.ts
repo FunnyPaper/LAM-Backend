@@ -31,6 +31,12 @@ export default new RolesBuilder([
         action: 'read:own',
         attributes: '*'
     },
+    {
+        role: Role.USER,
+        resource: 'users',
+        action: 'update:own',
+        attributes: '*'
+    },
     // auth
     {
         role: Role.ADMIN,

@@ -14,6 +14,7 @@ import { ConfigurationType } from './configuration/types/configuration.type';
 import configuration from './configuration/configuration';
 import { resolve } from 'path';
 import net from 'net';
+import { DynamicIoAdapter } from './scripts/gateways/dynamic-io.adapter';
 
 async function bootstrap() {
     const [argv, conf] = configurationCli();
@@ -31,8 +32,10 @@ async function bootstrap() {
 
     app.use(cookieParser());
     app.enableCors({
-        credentials: true
+        credentials: true,
+        origin: argv.origin
     });
+    app.useWebSocketAdapter(new DynamicIoAdapter(app, argv.origin));
 
     app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
     app.useGlobalFilters(new DomainErrorFilter())
@@ -66,4 +69,7 @@ async function bootstrap() {
     }
 }
 
-void bootstrap();
+bootstrap().catch(e => {
+    console.error(e);
+    process.exit(1);
+})

@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import columnDateOptions from "src/shared/decorators/column-date-options";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ScriptEntity } from "./script.entity";
 import { ScriptVersionStatusEnum } from "../enums/script-version-status.enum";
 import { ScriptContentEntity } from "./script-content.entity";
@@ -15,6 +15,9 @@ const enumType = columnEnumType(process.env.DB_TYPE!);
 export class ScriptVersionEntity {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
+
+    @Column({ nullable: true })
+    name!: string;
 
     @ManyToOne(() => ScriptEntity, (script) => script.versions, {
         onDelete: 'CASCADE'
@@ -43,4 +46,8 @@ export class ScriptVersionEntity {
     @CreateDateColumn(dateOptions)
     @Type(() => Date)
     createdAt!: Date;
+
+    @UpdateDateColumn(dateOptions)
+    @Type(() => Date)
+    updatedAt!: Date;
 }

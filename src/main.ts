@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import cookieParser from 'cookie-parser';
 import configuration from './configuration/configuration';
 import { ConfigurationType } from './configuration/types/configuration.type';
+import { DynamicIoAdapter } from './scripts/gateways/dynamic-io.adapter';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(
@@ -20,6 +21,7 @@ async function bootstrap() {
     app.enableCors({
         credentials: true
     });
+    app.useWebSocketAdapter(new DynamicIoAdapter(app, '*'));
 
     app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
     app.useGlobalFilters(new DomainErrorFilter())

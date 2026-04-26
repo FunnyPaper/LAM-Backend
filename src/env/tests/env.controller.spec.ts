@@ -1,12 +1,12 @@
 import { createUser } from 'test/utils/factories/users.factory';
-import { EnvController } from '../env.controller';
+import { EnvAnyController } from '../env.any.controller';
 import { createMocks } from './utils/controller/create-mocks';
 import { createEnv } from 'test/utils/factories/env.factory';
 import { CreateEnvDto } from '../dto/create-env.dto';
 import { UpdateEnvDto } from '../dto/update-env.dto';
 
-describe(EnvController.name, () => {
-    describe(`::${EnvController.prototype.create.name} should`, () => {
+describe(EnvAnyController.name, () => {
+    describe(`::${EnvAnyController.prototype.create.name} should`, () => {
         it("create env", async () => {
             const user = await createUser();
             user.envs = [];
@@ -27,7 +27,7 @@ describe(EnvController.name, () => {
         });
     });
 
-    describe(`::${EnvController.prototype.findAll.name} should`, () => {
+    describe(`::${EnvAnyController.prototype.findAll.name} should`, () => {
         it("return all user's envs", async () => {
             const user = await createUser();
             const env = await createEnv();
@@ -40,7 +40,7 @@ describe(EnvController.name, () => {
         });
     });
 
-    describe(`::${EnvController.prototype.findOne.name} should`, () => {
+    describe(`::${EnvAnyController.prototype.findOne.name} should`, () => {
         it("return user's specific env", async () => {
             const user = await createUser();
             const env = await createEnv();
@@ -53,7 +53,7 @@ describe(EnvController.name, () => {
         });
     });
 
-    describe(`::${EnvController.prototype.remove.name} should`, () => {
+    describe(`::${EnvAnyController.prototype.remove.name} should`, () => {
         it("remove user's env", async () => {
             const user = await createUser();
             const env = await createEnv();
@@ -66,7 +66,7 @@ describe(EnvController.name, () => {
         });
     });
 
-    describe(`::${EnvController.prototype.update.name} should`, () => {
+    describe(`::${EnvAnyController.prototype.update.name} should`, () => {
         it("update user's env", async () => {
             const user = await createUser();
             const env = await createEnv();

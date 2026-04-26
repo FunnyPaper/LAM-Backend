@@ -4,7 +4,6 @@ import { RunEvent } from "./run.event";
 import { AuthService } from "src/auth/auth.service";
 
 @WebSocketGateway({
-    cors: { origin: "*" },
     namespace: '/runs'
 })
 export class ScriptRunGateway implements OnGatewayConnection {

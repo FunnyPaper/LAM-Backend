@@ -1,8 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "../../app.roles";
-import { IsEnum, IsStrongPassword, Length, Matches, MaxLength } from "class-validator";
+import { IsStrongPassword, Length, Matches, MaxLength } from "class-validator";
 
-export class CreateUserDto {
+export class UpdateUserDto {
     @ApiProperty()
     @Matches(/^[a-zA-Z0-9._-]+$/)
     @Length(6, 32)
@@ -18,8 +17,4 @@ export class CreateUserDto {
     })
     @MaxLength(128)
     password!: string;
-
-    @ApiProperty({ enum: Role })
-    @IsEnum(Role)
-    role!: Role;
 }

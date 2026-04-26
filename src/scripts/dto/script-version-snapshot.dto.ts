@@ -5,6 +5,9 @@ import { Expose, Type } from "class-transformer";
 
 export class ScriptVersionSnapshotDto {
     @Expose()
+    name?: string;
+
+    @Expose()
     status!: ScriptVersionStatusEnum;
 
     @Expose()
@@ -12,6 +15,9 @@ export class ScriptVersionSnapshotDto {
 
     @Expose()
     createdAt!: Date;
+
+    @Expose()
+    updatedAt!: Date;
 
     @Expose()
     @Type(() => ScriptContentSnapshotDto)

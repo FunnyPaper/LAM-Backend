@@ -4,19 +4,19 @@ import { Expose, Type } from "class-transformer"
 export class PaginatedMetadataDto {
     @ApiProperty()
     @Expose()
-    page: number
+    page!: number
 
     @ApiProperty()
     @Expose()
-    limit: number
+    limit!: number
 
     @ApiProperty()
     @Expose()
-    totalItems: number
+    totalItems!: number
 
     @ApiProperty()
     @Expose()
-    totalPages: number
+    totalPages!: number
 }
 
 export function PaginatedDto<T extends new () => any>(cls: T) {
@@ -24,12 +24,12 @@ export function PaginatedDto<T extends new () => any>(cls: T) {
         @ApiProperty({ type: cls })
         @Expose()
         @Type(() => cls)
-        data: InstanceType<T>[]
+        data!: InstanceType<T>[]
 
         @ApiProperty()
         @Expose()
         @Type(() => PaginatedMetadataDto)
-        metadata: PaginatedMetadataDto
+        metadata!: PaginatedMetadataDto
     }
 
     return PaginatedDto;

@@ -1,6 +1,6 @@
 import { HttpStatus, INestApplication } from "@nestjs/common";
 import { StartedPostgreSqlContainer } from "@testcontainers/postgresql";
-import { EnvController } from "src/env/env.controller";
+import { EnvAnyController } from "src/env/env.any.controller";
 import { App } from "supertest/types";
 import { clearDB } from "test/utils/database";
 import { setupApp } from "test/utils/setup";
@@ -14,7 +14,7 @@ import { faker } from "@faker-js/faker";
 import { UpdateEnvDto } from "src/env/dto/update-env.dto";
 import { createEnv } from "test/utils/env";
 
-describe.each(testTypes())(`${EnvController.name} (e2e) (%s)`, (type) => {
+describe.each(testTypes())(`${EnvAnyController.name} (e2e) (%s)`, (type) => {
     describe('/users/:userId/envs/:envId (PUT)', () => {
         let app: INestApplication<App>;
         let container: StartedPostgreSqlContainer | null;

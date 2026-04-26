@@ -9,7 +9,7 @@ import { ScriptRunResultEntity } from "./script-run-result.entity";
 import { columnEnumType } from "src/shared/decorators/column-enum-type";
 import { UserEntity } from "src/users/entities/user.entity";
 import { EnvSnapshotDto } from "../dto/env-snapshot.dto";
-import { ScriptVersionSnapshotDto } from "../dto/script-versions-snapshot.dto";
+import { ScriptVersionSnapshotDto } from "../dto/script-version-snapshot.dto";
 
 const dateOptions = columnDateOptions(process.env.DB_TYPE!);
 const jsonType = columnJsonType(process.env.DB_TYPE!);
@@ -17,56 +17,56 @@ const enumType = columnEnumType(process.env.DB_TYPE!);
 
 @Entity({ name: 'script-run' })
 export class ScriptRunEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
 
-    @Column({ type: enumType, enum: ScriptRunStatusEnum, default: ScriptRunStatusEnum.Queued })
-    status!: ScriptRunStatusEnum;
+  @Column({ type: enumType, enum: ScriptRunStatusEnum, default: ScriptRunStatusEnum.Queued })
+  status!: ScriptRunStatusEnum;
 
-    @ManyToOne(() => ScriptVersionEntity, (version) => version.runs, {
-        nullable: true,
-        onDelete: 'SET NULL'
-    })
-    scriptVersion?: ScriptVersionEntity;
+  @ManyToOne(() => ScriptVersionEntity, (version) => version.runs, {
+    nullable: true,
+    onDelete: 'SET NULL'
+  })
+  scriptVersion?: ScriptVersionEntity;
 
-    @Column({ type: jsonType })
-    scriptVersionSnapshot!: ScriptVersionSnapshotDto;
+  @Column({ type: jsonType })
+  scriptVersionSnapshot!: ScriptVersionSnapshotDto;
 
-    @ManyToOne(() => EnvEntity, (env) => (env.runs), {
-        nullable: true,
-        onDelete: 'SET NULL'
-    })
-    env?: EnvEntity;
+  @ManyToOne(() => EnvEntity, (env) => (env.runs), {
+    nullable: true,
+    onDelete: 'SET NULL'
+  })
+  env?: EnvEntity;
 
-    @Column({
-        type: jsonType,
-        nullable: true
-    })
-    envSnapshot?: EnvSnapshotDto;
+  @Column({
+    type: jsonType,
+    nullable: true
+  })
+  envSnapshot?: EnvSnapshotDto;
 
-    @OneToOne(() => ScriptRunResultEntity, (content) => content.scriptRun, {
-        nullable: true,
-        cascade: true
-    })
-    result?: ScriptRunResultEntity;
+  @OneToOne(() => ScriptRunResultEntity, (content) => content.scriptRun, {
+    nullable: true,
+    cascade: true
+  })
+  result?: ScriptRunResultEntity;
 
-    @ManyToOne(() => UserEntity, (user) => user.scriptRuns, {
-        onDelete: 'CASCADE'
-    })
-    createdBy!: UserEntity;
+  @ManyToOne(() => UserEntity, (user) => user.scriptRuns, {
+    onDelete: 'CASCADE'
+  })
+  createdBy!: UserEntity;
 
-    @CreateDateColumn(dateOptions)
-    @Type(() => Date)
-    createdAt!: Date;
+  @CreateDateColumn(dateOptions)
+  @Type(() => Date)
+  createdAt!: Date;
 
-    @UpdateDateColumn(dateOptions)
-    @Type(() => Date)
-    updatedAt!: Date;
+  @UpdateDateColumn(dateOptions)
+  @Type(() => Date)
+  updatedAt!: Date;
 
-    @Column({
-        ...dateOptions,
-        nullable: true
-    })
-    @Type(() => Date)
-    finishedAt!: Date;
+  @Column({
+    ...dateOptions,
+    nullable: true
+  })
+  @Type(() => Date)
+  finishedAt!: Date;
 }

@@ -20,6 +20,7 @@ export const DomainErrorCodes = {
     scriptNotFound: "SCRIPT_NOT_FOUND",
     scriptVersionNotFound: "SCRIPT_VERSION_NOT_FOUND",
     nonDraftScriptVersionUpdate: "NON_DRAFT_SCRIPT_VERSION_UPDATE",
+    archivedScriptVersionArchive: "ARCHIVED_SCRIPT_VERSION_ARCHIVE",
     nonDraftScriptVersionPublish: "NON_DRAFT_SCRIPT_VERSION_PUBLISH",
     scriptRunNotFound: "SCRIPT_RUN_NOT_FOUND",
     scriptRunRemoveStatus: "SCRIPT_RUN_REMOVE_STATUS",

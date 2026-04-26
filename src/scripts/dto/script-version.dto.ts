@@ -1,13 +1,18 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { ScriptVersionStatusEnum } from "../enums/script-version-status.enum";
 import { Expose, Type } from "class-transformer";
 import { ScriptContentDto } from "./script-content.dto";
 import { ScriptSourceDto } from "./script-source.dto";
+import { ScriptRunDto } from "./script-run.dto";
 
 export class ScriptVersionDto {
     @ApiProperty()
     @Expose()
     id!: string;
+
+    @ApiPropertyOptional({ nullable: true })
+    @Expose()
+    name!: string | null;
 
     @ApiProperty()
     @Expose()
@@ -18,6 +23,11 @@ export class ScriptVersionDto {
     @Expose()
     @Type(() => ScriptSourceDto)
     source!: ScriptSourceDto;
+
+    @ApiPropertyOptional()
+    @Expose()
+    @Type(() => ScriptRunDto)
+    runs?: ScriptRunDto[];
 
     @ApiProperty()
     @Expose()
@@ -31,4 +41,9 @@ export class ScriptVersionDto {
     @Expose()
     @Type(() => Date)
     createdAt!: Date;
+
+    @ApiProperty()
+    @Expose()
+    @Type(() => Date)
+    updatedAt!: Date;
 }

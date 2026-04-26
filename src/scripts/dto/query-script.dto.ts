@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Expose, Type } from "class-transformer";
-import { IsIn, IsOptional, IsUUID, Length, ValidateNested } from "class-validator";
+import { Expose, Transform, Type } from "class-transformer";
+import { IsArray, IsIn, IsOptional, IsUUID, Length, ValidateNested } from "class-validator";
 import { PaginationDto } from "src/shared/dto/pagination.dto";
 
 export class ScriptSortDto {
@@ -56,4 +56,15 @@ export class QueryScriptDto {
     @ValidateNested()
     @Type(() => PaginationDto)
     pagination?: PaginationDto
+
+    @ApiPropertyOptional({ isArray: true })
+    @Expose()
+    @IsOptional()
+    @IsArray()
+    @IsIn(['versions', 'runs'], { each: true })
+    @Transform(({ value }) => {
+        if (Array.isArray(value)) return value;
+        return value ? [value] : [];
+    })
+    include?: string[];
 }

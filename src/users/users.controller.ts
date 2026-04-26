@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Request, SerializeOptions, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Request, SerializeOptions, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -7,6 +7,7 @@ import { UserDto } from './dtos/user.dto';
 import { ACGuard, UseRoles } from 'nest-access-control';
 import { Role } from '../app.roles';
 import { UserOwnershipGuardFactory } from 'src/auth/guards/user-ownership.guard';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, ACGuard)
@@ -71,5 +72,22 @@ export class UsersController {
             password,
             role: role
         });
+    }
+
+    @ApiCreatedResponse({ type: UserDto })
+    @UseRoles({ resource: 'users', action: 'update', possession: 'own' })
+    @SerializeOptions({ type: UserDto })
+    @Put('me')
+    update(
+        @Request() req: {
+            user: {
+                id: string,
+                username: string,
+                roles: Role[]
+            }
+        },
+        @Body() body: UpdateUserDto
+    ) {
+        return this.usersService.updateById(req.user.id, body)
     }
 }

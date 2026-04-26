@@ -11,6 +11,12 @@ export function UserOwnershipGuardFactory(idFieldName: string = 'id') {
             const isAdmin = req.user.roles.includes(Role.ADMIN);
             const id = req.user.id;
             const paramId = req.params[idFieldName];
+            const isMe = paramId == 'me';
+
+            if (isMe) {
+                req.params[idFieldName] = req.user.id;
+                return true;
+            }
 
             return isAdmin || String(id) === String(paramId);
         }

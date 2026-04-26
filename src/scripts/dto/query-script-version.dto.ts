@@ -1,9 +1,10 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { Expose, Type } from "class-transformer"
-import { IsEnum, IsIn, IsNumber, IsOptional, IsUUID, ValidateNested } from "class-validator"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Expose, Transform, Type } from "class-transformer";
+import { IsArray, IsEnum, IsIn, IsNumber, IsOptional, IsUUID, ValidateNested } from "class-validator";
 import { ScriptSourceFormatEnum } from "../enums/script-source-format.enum";
 import { ScriptFilterDto } from "./query-script.dto";
 import { PaginationDto } from "src/shared/dto/pagination.dto";
+import { ScriptVersionStatusEnum } from "../enums/script-version-status.enum";
 
 export class ScriptVersionSortDto {
     @ApiProperty()
@@ -12,6 +13,7 @@ export class ScriptVersionSortDto {
         'versionNumber',
         'status',
         'createdAt',
+        'updatedAt',
         'sourceFormat',
         'sourceCreatedAt',
         'sourceUpdatedAt',
@@ -46,14 +48,22 @@ export class ScriptVersionFilterDto {
     @ApiPropertyOptional()
     @Expose()
     @IsOptional()
+    @ValidateNested()
     @Type(() => ScriptSourceFilterDto)
     source?: ScriptSourceFilterDto
 
     @ApiPropertyOptional()
     @Expose()
     @IsOptional()
+    @ValidateNested()
     @Type(() => ScriptContentFilterDto)
     content?: ScriptContentFilterDto
+
+    @ApiPropertyOptional()
+    @Expose()
+    @IsOptional()
+    @IsEnum(ScriptVersionStatusEnum)
+    status?: ScriptVersionStatusEnum;
 
     @ApiPropertyOptional()
     @Expose()
@@ -83,4 +93,15 @@ export class QueryScriptVersionDto {
     @ValidateNested()
     @Type(() => PaginationDto)
     pagination?: PaginationDto
+
+    @ApiPropertyOptional({ isArray: true })
+    @Expose()
+    @IsOptional()
+    @IsArray()
+    @IsIn(['runs'], { each: true })
+    @Transform(({ value }) => {
+        if (Array.isArray(value)) return value;
+        return value ? [value] : [];
+    })
+    include?: string[];
 }

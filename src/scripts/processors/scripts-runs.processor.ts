@@ -13,163 +13,163 @@ import { ConfigService } from "@nestjs/config";
 import { ConfigurationType, ScriptsConfiguration } from "src/configuration/types/configuration.type";
 
 const statusMapper = {
-    [JobStatus.CANCELLED]: ScriptRunStatusEnum.Cancelled,
-    [JobStatus.COMPLETED]: ScriptRunStatusEnum.Succeeded,
-    [JobStatus.FAILED]: ScriptRunStatusEnum.Failed,
-    [JobStatus.RUNNING]: ScriptRunStatusEnum.Running,
-    [JobStatus.STARTED]: ScriptRunStatusEnum.Running
+  [JobStatus.CANCELLED]: ScriptRunStatusEnum.Cancelled,
+  [JobStatus.COMPLETED]: ScriptRunStatusEnum.Succeeded,
+  [JobStatus.FAILED]: ScriptRunStatusEnum.Failed,
+  [JobStatus.RUNNING]: ScriptRunStatusEnum.Running,
+  [JobStatus.STARTED]: ScriptRunStatusEnum.Running
 };
 
 @Injectable()
 export class ScriptsRunsProcessor {
 
-    private queue: PQueue;
-    private pendingRuns: Set<string>;
+  private queue: PQueue;
+  private pendingRuns: Set<string>;
 
-    constructor(
-        @InjectRepository(ScriptRunEntity)
-        private readonly scriptsRunsRepo: Repository<ScriptRunEntity>,
+  constructor(
+    @InjectRepository(ScriptRunEntity)
+    private readonly scriptsRunsRepo: Repository<ScriptRunEntity>,
 
-        @InjectRepository(ScriptRunResultEntity)
-        private readonly scriptsRunsResultsRepo: Repository<ScriptRunResultEntity>,
+    @InjectRepository(ScriptRunResultEntity)
+    private readonly scriptsRunsResultsRepo: Repository<ScriptRunResultEntity>,
 
-        private readonly grpcClientService: ScriptsRunsGrpcClientService,
-        private readonly gateway: ScriptRunGateway,
-        private readonly authService: AuthService,
-        configService: ConfigService<ConfigurationType>
-    ) {
-        const scripts: ScriptsConfiguration = configService.get('scripts')!;
-        this.queue = new PQueue({
-            concurrency: scripts.concurrency
-        });
+    private readonly grpcClientService: ScriptsRunsGrpcClientService,
+    private readonly gateway: ScriptRunGateway,
+    private readonly authService: AuthService,
+    configService: ConfigService<ConfigurationType>
+  ) {
+    const scripts: ScriptsConfiguration = configService.get('scripts')!;
+    this.queue = new PQueue({
+      concurrency: scripts.concurrency
+    });
 
-        this.pendingRuns = new Set();
-    }
+    this.pendingRuns = new Set();
+  }
 
-    enqueueStartJob(
-        runId: string,
-        userId: string,
-        script: Record<string, any>,
-        env: Record<string, any> | undefined,
-    ) {
-        this.pendingRuns.add(runId);
-        const job = this.queue.add(() => this.startJob(runId, userId, script, env));
-        return job;
-    }
+  enqueueStartJob(
+    runId: string,
+    userId: string,
+    script: Record<string, any>,
+    env: Record<string, any> | undefined,
+  ) {
+    this.pendingRuns.add(runId);
+    const job = this.queue.add(() => this.startJob(runId, userId, script, env));
+    return job;
+  }
 
-    async startJob(
-        runId: string,
-        userId: string,
-        script: Record<string, any>,
-        env: Record<string, any> | undefined
-    ) {
-        if (!this.pendingRuns.has(runId)) return;
+  async startJob(
+    runId: string,
+    userId: string,
+    script: Record<string, any>,
+    env: Record<string, any> | undefined
+  ) {
+    if (!this.pendingRuns.has(runId)) return;
 
-        const token = this.authService.createGrpcToken(userId, ['run:start'], { runId: runId });
-        const stream = this.grpcClientService.startJob(runId, script, env, token);
+    const token = this.authService.createGrpcToken(userId, ['run:start'], { runId: runId });
+    const stream = this.grpcClientService.startJob(runId, script, env, token);
 
-        await new Promise<void>((resolve) => {
-            stream.subscribe({
-                next: async (event) => {
-                    const currentRun = await this.scriptsRunsRepo.findOne({
-                        where: { id: runId },
-                        relations: { result: true }
-                    });
+    await new Promise<void>((resolve) => {
+      stream.subscribe({
+        next: async (event) => {
+          const currentRun = await this.scriptsRunsRepo.findOne({
+            where: { id: runId },
+            relations: { result: true }
+          });
 
-                    switch (event.type) {
-                        case JobEventType.STATUS_CHANGE: {
-                            const status = event.status!;
-                            currentRun!.status = statusMapper[status];
+          switch (event.type) {
+            case JobEventType.STATUS_CHANGE: {
+              const status = event.status!;
+              currentRun!.status = statusMapper[status];
 
-                            await this.scriptsRunsRepo.save(currentRun!);
+              await this.scriptsRunsRepo.save(currentRun!);
 
-                            this.gateway.emitRunEvent(runId, {
-                                type: "status",
-                                status: statusMapper[status]
-                            });
-                            break;
-                        }
-                        case JobEventType.RESULT_UPDATE: {
-                            const result = this.scriptsRunsResultsRepo.create(currentRun!.result!);
+              this.gateway.emitRunEvent(runId, {
+                type: "status",
+                status: statusMapper[status]
+              });
+              break;
+            }
+            case JobEventType.RESULT_UPDATE: {
+              let data: Record<string, any>;
 
-                            switch (event.payload!.type) {
-                                case StatusType.PARTIAL:
-                                    result.data = {
-                                        ...currentRun?.result?.data,
-                                        ...event.payload?.data
-                                    };
-                                    break;
-                                case StatusType.FULL:
-                                    result.data = event.payload?.data ?? {};
-                                    break;
-                            }
+              switch (event.payload!.type) {
+                case StatusType.PARTIAL:
+                  data = {
+                    ...currentRun?.result?.data,
+                    ...event.payload?.data
+                  };
+                  break;
+                case StatusType.FULL:
+                  data = event.payload?.data ?? {};
+                  break;
+              }
 
-                            void this.scriptsRunsResultsRepo.save(result);
+              await this.scriptsRunsResultsRepo.update(currentRun!.id, { data: data! });
 
-                            this.gateway.emitRunEvent(runId, {
-                                type: "resultUpdate",
-                                change: {
-                                    type: event.payload!.type as unknown as "partial" | "full",
-                                    data: event.payload!.data!
-                                }
-                            });
-                            break;
-                        }
-                        case JobEventType.LOG: {
-                            this.gateway.emitRunEvent(runId, {
-                                type: "log",
-                                log: {
-                                    type: event.log!.type as unknown as "info" | "warn" | "error",
-                                    message: event.log!.message
-                                }
-                            });
-                            break;
-                        }
-                    }
-                    return event;
-                },
+              this.gateway.emitRunEvent(runId, {
+                type: "resultUpdate",
+                change: {
+                  type: event.payload!.type as unknown as "partial" | "full",
+                  data: event.payload!.data!
+                }
+              });
+              break;
+            }
+            case JobEventType.LOG: {
+              this.gateway.emitRunEvent(runId, {
+                type: "log",
+                log: {
+                  type: event.log!.type as unknown as "info" | "warn" | "error",
+                  message: event.log!.message
+                }
+              });
+              break;
+            }
+          }
+          return event;
+        },
 
-                error: (err) => {
-                    this.gateway.emitRunEvent(runId, {
-                        type: "status",
-                        status: ScriptRunStatusEnum.Failed
-                    });
-                    resolve();
-                },
-                complete: resolve
+        error: (err) => {
+          this.gateway.emitRunEvent(runId, {
+            type: "status",
+            status: ScriptRunStatusEnum.Failed
+          });
+          resolve();
+        },
+        complete: resolve
+      });
+
+    });
+
+    this.pendingRuns.delete(runId);
+
+    return runId;
+  }
+
+  async cancelJob(runId: string, token: string) {
+    if (this.pendingRuns.has(runId)) {
+      await new Promise<void>((resolve) => {
+        this.grpcClientService.cancelJob(runId, token).subscribe({
+          error: () => {
+            this.gateway.emitRunEvent(runId, {
+              type: "status",
+              status: ScriptRunStatusEnum.Failed
             });
-
-        });
-
-        this.pendingRuns.delete(runId);
-
-        return runId;
-    }
-
-    async cancelJob(runId: string, token: string) {
-        if (this.pendingRuns.has(runId)) {
-            await new Promise<void>((resolve) => {
-                this.grpcClientService.cancelJob(runId, token).subscribe({
-                    error: () => {
-                        this.gateway.emitRunEvent(runId, {
-                            type: "status",
-                            status: ScriptRunStatusEnum.Failed
-                        });
-                        resolve();
-                    },
-                    complete: () => {
-                        this.gateway.emitRunEvent(runId, {
-                            type: "status",
-                            status: ScriptRunStatusEnum.Cancelled
-                        });
-                        resolve();
-                    }
-                });
+            resolve();
+          },
+          complete: () => {
+            this.gateway.emitRunEvent(runId, {
+              type: "status",
+              status: ScriptRunStatusEnum.Cancelled
             });
-        }
-
-        this.pendingRuns.delete(runId);
-
-        return runId;
+            resolve();
+          }
+        });
+      });
     }
+
+    this.pendingRuns.delete(runId);
+
+    return runId;
+  }
 }

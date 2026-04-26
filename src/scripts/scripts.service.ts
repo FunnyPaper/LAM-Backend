@@ -78,7 +78,8 @@ export class ScriptsService {
                 }
             },
             relations: {
-                owner: true
+                owner: true,
+                versions: true
             }
         });
 
@@ -113,6 +114,7 @@ export class ScriptsService {
 
     private parseRelations(userId: string, dto: QueryScriptDto): FindOptionsRelations<ScriptEntity> {
         const { scriptVersionId, runId } = dto.filtering || {};
+        const include = dto.include || [];
         const relations: FindOptionsRelations<ScriptEntity> = {};
 
         if (scriptVersionId) {
@@ -120,6 +122,14 @@ export class ScriptsService {
         }
 
         if (runId) {
+            relations.versions = { runs: true };
+        }
+
+        if (include.includes('versions')) {
+            relations.versions ||= true;
+        }
+
+        if (include.includes('runs')) {
             relations.versions = { runs: true };
         }
 

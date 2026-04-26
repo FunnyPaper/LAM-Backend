@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Patch, Query, Request, UseGuards, SerializeOptions } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch, Query, UseGuards, SerializeOptions } from '@nestjs/common';
 import { CreateScriptVersionDto } from './dto/create-script-version.dto';
 import { QueryScriptVersionDto, ScriptVersionFilterDto, ScriptVersionSortDto } from './dto/query-script-version.dto';
 import { UpdateScriptVersionDto } from './dto/update-script-version.dto';
@@ -13,6 +13,7 @@ import { PaginationDto } from 'src/shared/dto/pagination.dto';
 import { ApiDeepQuery } from 'src/shared/decorators/api-deep-query';
 import { PaginatedScriptVersionDto } from './dto/paginated-script-version.dto';
 import { plainToInstance } from 'class-transformer';
+import { PublishScriptVersionDto } from './dto/publish-script-version.dto';
 
 @ApiBearerAuth('access-token')
 @UseGuards(JwtAuthGuard, ACGuard, UserRequestIdGuard)
@@ -107,8 +108,20 @@ export class ScriptsVersionsController {
         @RequestUserId() userId: string,
         @Param('scriptId') scriptId: string,
         @Param('scriptVersionId') scriptVersionId: string,
+        @Body() body: PublishScriptVersionDto
     ) {
-        return this.scriptsVersionsService.publish(userId, scriptId, scriptVersionId);
+        return this.scriptsVersionsService.publish(userId, scriptId, scriptVersionId, body);
+    }
+
+    @SerializeOptions({ type: ScriptVersionDto })
+    @UseRoles({ resource: 'scripts-versions', action: 'update', possession: 'own' })
+    @Patch(':scriptVersionId/archive')
+    archive(
+        @RequestUserId() userId: string,
+        @Param('scriptId') scriptId: string,
+        @Param('scriptVersionId') scriptVersionId: string
+    ) {
+        return this.scriptsVersionsService.archive(userId, scriptId, scriptVersionId);
     }
 
     @UseRoles({ resource: 'scripts-versions', action: 'delete', possession: 'own' })

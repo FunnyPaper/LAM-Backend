@@ -1,14 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
+import { ScriptVersionDto } from "./script-version.dto";
 
 export class ScriptDto {
     @ApiProperty()
     @Expose()
-    id: string;
+    id!: string;
 
     @ApiProperty()
     @Expose()
-    name: string;
+    name!: string;
 
     @ApiPropertyOptional()
     @Expose()
@@ -17,10 +18,15 @@ export class ScriptDto {
     @ApiProperty()
     @Expose()
     @Type(() => Date)
-    createdAt: Date;
+    createdAt!: Date;
 
     @ApiProperty()
     @Expose()
     @Type(() => Date)
-    updatedAt: Date;
+    updatedAt!: Date;
+
+    @ApiProperty()
+    @Expose()
+    @Type(() => ScriptVersionDto)
+    versions?: ScriptVersionDto[]
 }

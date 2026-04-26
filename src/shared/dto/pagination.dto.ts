@@ -7,11 +7,11 @@ export class PaginationDto {
     @Expose()
     @IsNumber()
     @Min(1)
-    page: number;
+    page!: number;
 
     @ApiProperty({ default: 10 })
     @Expose()
     @IsNumber()
     @Min(1)
-    limit: number;
+    limit!: number;
 }
