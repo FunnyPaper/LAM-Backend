@@ -19,7 +19,7 @@ export class ScriptRunResultEntity {
     scriptRun!: ScriptRunEntity;
 
     @Column({ type: jsonType, nullable: true })
-    data?: Record<string, any>;
+    data?: Record<string, any>[];
 
     @CreateDateColumn(dateOptions)
     @Type(() => Date)

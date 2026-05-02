@@ -1,5 +1,7 @@
+import { join } from "path";
 import { ConfigurationType } from "./types/configuration.type";
 import { config } from "dotenv";
+import os from 'os';
 
 export default (path: string): ConfigurationType => {
     config({ path });
@@ -7,6 +9,14 @@ export default (path: string): ConfigurationType => {
         type: process.env.TYPE || 'local',
         port: parseInt(process.env.NODE_PORT!, 10),
         cwd: process.cwd(),
+        appDir: join(
+            process.env.LOCALAPPDATA || (
+                process.platform == 'darwin' ? join(os.homedir(), "Library", "Application Support") :
+                process.platform == 'linux' ? join(os.homedir(), '.config') :
+                os.homedir()
+            ),
+            "lam-backend"
+        ),
         database: {
             type: process.env.DB_TYPE,
             host: process.env.DB_HOST,

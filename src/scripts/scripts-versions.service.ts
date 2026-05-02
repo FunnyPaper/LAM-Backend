@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { ScriptVersionEntity } from './entities/script-version.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,17 +12,19 @@ import { NonDraftScriptVersionUpdateError } from './errors/non-draft-script-vers
 import { ScriptSourceEntity } from './entities/script-source.entity';
 import { ScriptContentEntity } from './entities/script-content.entity';
 import { ScriptRunEntity } from './entities/script-run.entity';
-import { NonDraftScriptVersionPublishError } from './errors/non-draft-script-version-publish.error';
+import { PublishedScriptVersionPublishError } from './errors/published-script-version-publish.error';
 import { Require } from 'src/shared/types/require';
 import { PaginatedScriptVersionDto } from './dto/paginated-script-version.dto';
 import { ArchivedScriptVersionArchiveError } from './errors/archived-script-version-archive.error';
 import { PublishScriptVersionDto } from './dto/publish-script-version.dto';
+import { ScriptSourceFormatEnum } from './enums/script-source-format.enum';
 
 @Injectable()
 export class ScriptsVersionsService {
   public constructor(
     @InjectRepository(ScriptVersionEntity)
     private readonly scriptsVersionsRepo: Repository<ScriptVersionEntity>,
+    @Inject(forwardRef(() => ScriptsService))
     private readonly scriptsService: ScriptsService,
   ) { }
 
@@ -39,6 +41,20 @@ export class ScriptsVersionsService {
     });
 
     return this.scriptsVersionsRepo.save(version);
+  }
+
+  public async createEmpty(userId: string, scriptId: string) {
+    return this.create(userId, scriptId, {
+      content: {
+        astJson: {},
+        astVersion: 1,
+        engineVersion: 1
+      },
+      source: {
+        format: ScriptSourceFormatEnum.Json,
+        content: '{}'
+      }
+    });
   }
 
   public findAll(userId: string, scriptId: string, dto: QueryScriptVersionDto): Promise<ScriptVersionEntity[] | PaginatedScriptVersionDto> {
@@ -160,8 +176,8 @@ export class ScriptsVersionsService {
   public async publish(userId: string, scriptId: string, versionId: string, dto: PublishScriptVersionDto): Promise<ScriptVersionEntity> {
     const version = await this.findById(userId, scriptId, versionId);
 
-    if (version.status != ScriptVersionStatusEnum.Draft) {
-      throw new NonDraftScriptVersionPublishError(userId, scriptId, versionId, version.status);
+    if (version.status == ScriptVersionStatusEnum.Published) {
+      throw new PublishedScriptVersionPublishError(userId, scriptId, versionId);
     }
 
     const result = await this.scriptsVersionsRepo.save({
@@ -190,7 +206,29 @@ export class ScriptsVersionsService {
 
   public async remove(userId: string, scriptId: string, versionId: string): Promise<void> {
     const version = await this.findById(userId, scriptId, versionId);
+
     await this.scriptsVersionsRepo.delete(version.id);
+
+    const count = await this.scriptsVersionsRepo.count({
+      where: {
+        script: {
+          id: scriptId,
+          owner: {
+            id: userId
+          }
+        }
+      },
+      relations: {
+        script: {
+          owner: true
+        }
+      },
+    })
+
+    // There should be always one empty draft version
+    if (count == 0) {
+      await this.createEmpty(userId, scriptId);
+    }
   }
 
   private findLastVersion(userId: string, scriptId: string): Promise<ScriptVersionEntity | null> {

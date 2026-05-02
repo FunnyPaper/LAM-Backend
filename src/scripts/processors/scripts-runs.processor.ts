@@ -1,3 +1,4 @@
+import { LogType } from './../../proto/worker';
 import PQueue from "p-queue";
 import { Injectable } from "@nestjs/common";
 import { ScriptsRunsGrpcClientService } from "../scripts-runs-grpc-client.service";
@@ -13,12 +14,24 @@ import { ConfigService } from "@nestjs/config";
 import { ConfigurationType, ScriptsConfiguration } from "src/configuration/types/configuration.type";
 
 const statusMapper = {
+  [JobStatus.CANCELLING]: ScriptRunStatusEnum.Cancelling,
   [JobStatus.CANCELLED]: ScriptRunStatusEnum.Cancelled,
   [JobStatus.COMPLETED]: ScriptRunStatusEnum.Succeeded,
   [JobStatus.FAILED]: ScriptRunStatusEnum.Failed,
   [JobStatus.RUNNING]: ScriptRunStatusEnum.Running,
   [JobStatus.STARTED]: ScriptRunStatusEnum.Running
-};
+} as const;
+
+const logTypeMapper = {
+  [LogType.INFO]: 'info',
+  [LogType.WARN]: 'warn',
+  [LogType.ERROR]: 'error',
+} as const;
+
+const resultUpdateTypeMapper = {
+  [StatusType.FULL]: 'full',
+  [StatusType.PARTIAL]: 'partial'
+} as const;
 
 @Injectable()
 export class ScriptsRunsProcessor {
@@ -90,17 +103,17 @@ export class ScriptsRunsProcessor {
               break;
             }
             case JobEventType.RESULT_UPDATE: {
-              let data: Record<string, any>;
+              let data: Record<string, any>[];
 
               switch (event.payload!.type) {
                 case StatusType.PARTIAL:
-                  data = {
-                    ...currentRun?.result?.data,
-                    ...event.payload?.data
-                  };
+                  data = [
+                    ...(currentRun?.result?.data ?? []),
+                    ...(event.payload!.data ?? [])
+                  ];
                   break;
                 case StatusType.FULL:
-                  data = event.payload?.data ?? {};
+                  data = event.payload!.data;
                   break;
               }
 
@@ -109,8 +122,8 @@ export class ScriptsRunsProcessor {
               this.gateway.emitRunEvent(runId, {
                 type: "resultUpdate",
                 change: {
-                  type: event.payload!.type as unknown as "partial" | "full",
-                  data: event.payload!.data!
+                  type: resultUpdateTypeMapper[event.payload!.type],
+                  data: event.payload!.data
                 }
               });
               break;
@@ -119,7 +132,7 @@ export class ScriptsRunsProcessor {
               this.gateway.emitRunEvent(runId, {
                 type: "log",
                 log: {
-                  type: event.log!.type as unknown as "info" | "warn" | "error",
+                  type: logTypeMapper[event.log!.type],
                   message: event.log!.message
                 }
               });
@@ -149,6 +162,11 @@ export class ScriptsRunsProcessor {
   async cancelJob(runId: string, token: string) {
     if (this.pendingRuns.has(runId)) {
       await new Promise<void>((resolve) => {
+        this.gateway.emitRunEvent(runId, {
+          type: "status",
+          status: ScriptRunStatusEnum.Cancelling
+        });
+
         this.grpcClientService.cancelJob(runId, token).subscribe({
           error: () => {
             this.gateway.emitRunEvent(runId, {

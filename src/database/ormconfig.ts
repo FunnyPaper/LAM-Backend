@@ -16,6 +16,7 @@ export const ormconfig = (
     configService: ConfigService<ConfigurationType>
 ): DataSourceOptions => {
     const cwd = configService.get<string>('cwd')!;
+    const appDir = configService.get<string>('appDir')!;
     const dbConfig = configService.get<DatabaseConfiguration>('database')!;
     const entities = [
         UserEntity,
@@ -32,7 +33,7 @@ export const ormconfig = (
     if (dbConfig.type === 'sqlite') {
         return {
             type: 'sqlite',
-            database: resolve(cwd, dbConfig.database!),
+            database: resolve(appDir, dbConfig.database!),
             entities: entities,
             migrations: [resolve(cwd, './dist/migrations/local/*.js')],
             synchronize: dbConfig.synchronize

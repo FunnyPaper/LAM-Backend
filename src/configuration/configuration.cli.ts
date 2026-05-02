@@ -15,6 +15,10 @@ export default () => {
             default: process.cwd(),
             description: "Path to current working directory. Used for resolving additional files."
         })
+        .option("app-dir", {
+            type: 'string',
+            description: 'Path used to save data into.'
+        })
         .option("node-port", {
             type: "number",
             default: process.env.NODE_PORT,
@@ -63,6 +67,7 @@ export default () => {
             ...defaults,
             port: argv['node-port'] as unknown as number ?? defaults.port,
             cwd: argv.cwd ?? defaults.cwd,
+            appDir: argv['app-dir'] ?? defaults.appDir,
             grpc: {
                 ...defaults.grpc,
                 host: argv['grpc-host'] ?? defaults.grpc.host,

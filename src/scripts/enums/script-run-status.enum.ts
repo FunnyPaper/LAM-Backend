@@ -3,5 +3,6 @@ export enum ScriptRunStatusEnum {
     Running = "Running",
     Succeeded = "Succeeded",
     Failed = "Failed",
-    Cancelled = "Cancelled"
+    Cancelled = "Cancelled",
+    Cancelling = "Cancelling"
 }

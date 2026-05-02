@@ -11,8 +11,6 @@ import { DataSource } from 'typeorm';
 import cookieParser from 'cookie-parser';
 import configurationCli from './configuration/configuration.cli';
 import { ConfigurationType } from './configuration/types/configuration.type';
-import configuration from './configuration/configuration';
-import { resolve } from 'path';
 import net from 'net';
 import { DynamicIoAdapter } from './scripts/gateways/dynamic-io.adapter';
 
@@ -24,7 +22,7 @@ async function bootstrap() {
     await dataSource.runMigrations();
 
     const commandContext = await NestFactory.createApplicationContext(
-        CommandModule.register(() => configuration(resolve(argv.cwd ?? process.cwd(), '.env')))
+        CommandModule.register(conf)
     );
     const initCommand = commandContext.get(InitCommand);
     await initCommand.run();

@@ -2,6 +2,7 @@ export type ConfigurationType = {
     type: string,
     port: number,
     cwd: string,
+    appDir: string,
     database: DatabaseConfiguration,
     grpc: GRPCConfiguration,
     jwt: JWTConfiguration,

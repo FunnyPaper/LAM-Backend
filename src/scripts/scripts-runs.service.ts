@@ -54,7 +54,7 @@ export class ScriptsRunsService {
       env = await this.envService.findById(userId, dto.envId);
     }
 
-    const scriptRunResult = this.scriptsRunsResultsRepo.create({ data: {} });
+    const scriptRunResult = this.scriptsRunsResultsRepo.create({ data: [] });
     const scriptRun = this.scriptsRunsRepo.create({
       ...dto,
       env: env,
