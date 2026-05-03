@@ -19,10 +19,36 @@ run('npm run build:windows:x64');
 console.log('Organizing build directory...');
 fs.mkdirSync('build', { recursive: true });
 
-const simpleFiles = ['lam-backend.exe', '.env'];
+const simpleFiles = ['lam-backend.exe'];
 simpleFiles.forEach(f => {
     if (fs.existsSync(f)) fs.cpSync(f, path.join('build', f));
 });
+
+const env = `
+# Initial Admin Credentials
+  INITIAL_ADMIN_USERNAME = "SuperAdmin"
+  INITIAL_ADMIN_PASSWORD = "Abc123@"
+
+# DB
+  TYPE=local
+  DB_TYPE=sqlite
+  DB_DATABASE=local.sqlite3
+  DB_SYNCHRONIZE=false
+
+# JWT
+  JWT_ACCESS_SECRET=access-secret
+  JWT_ACCESS_EXPIRES_IN=15m
+  JWT_REFRESH_SECRET=refresh-secret
+  JWT_REFRESH_EXPIRES_IN=30d
+
+# HASH
+  HASH_SALT_ROUNDS=10
+
+# Max concurrent runners
+  SCRIPT_RUNS_CONCURRENCY=1
+`.trim()
+
+fs.writeFileSync(path.join('build', '.env'), env);
 
 const copyWithFilter = (src, dest, ext) => {
     if (!fs.existsSync(src)) return;
