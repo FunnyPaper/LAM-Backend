@@ -62,6 +62,7 @@ const copyWithFilter = (src, dest, ext) => {
 };
 
 copyWithFilter('dist', 'build', '.node');
+copyWithFilter('dist/migrations/local', 'build', '.js');
 copyWithFilter('proto', 'build', '.proto');
 
 if (fs.existsSync('lam-backend.exe')) fs.rmSync('lam-backend.exe');
