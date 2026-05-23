@@ -1,6 +1,7 @@
 export type ConfigurationType = {
     type: string,
     port: number,
+    origin: string,
     cwd: string,
     appDir: string,
     database: DatabaseConfiguration,

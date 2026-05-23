@@ -28,12 +28,17 @@ async function bootstrap() {
     await initCommand.run();
     await commandContext.close();
 
+    const configService: ConfigService<ConfigurationType> = app.get(ConfigService);
+    const type: string = configService.get('type')!;
+    const port: number = configService.get('port')!;
+    const origin: string = configService.get('origin')!;
+    
     app.use(cookieParser());
     app.enableCors({
         credentials: true,
-        origin: argv.origin
+        origin: origin
     });
-    app.useWebSocketAdapter(new DynamicIoAdapter(app, argv.origin));
+    app.useWebSocketAdapter(new DynamicIoAdapter(app, origin));
 
     app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
     app.useGlobalFilters(new DomainErrorFilter())
@@ -43,10 +48,6 @@ async function bootstrap() {
         transformOptions: { enableImplicitConversion: true }
     }))
     app.set('query parser', 'extended');
-
-    const configService: ConfigService<ConfigurationType> = app.get(ConfigService);
-    const type: string = configService.get('type')!;
-    const port: number = configService.get('port')!;
 
     const nestServer = await app.listen(port);
     console.log(`Running in mode ${type} on port ${(nestServer.address() as net.AddressInfo).port}`);

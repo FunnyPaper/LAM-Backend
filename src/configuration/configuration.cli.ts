@@ -66,6 +66,7 @@ export default () => {
         return {
             ...defaults,
             port: argv['node-port'] as unknown as number ?? defaults.port,
+            origin: argv.origin ?? defaults.origin,
             cwd: argv.cwd ?? defaults.cwd,
             appDir: argv['app-dir'] ?? defaults.appDir,
             grpc: {

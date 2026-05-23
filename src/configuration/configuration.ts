@@ -8,13 +8,12 @@ export default (path: string): ConfigurationType => {
     return {
         type: process.env.TYPE || 'local',
         port: parseInt(process.env.NODE_PORT!, 10),
+        origin: process.env.ORIGIN ?? '*',
         cwd: process.cwd(),
-        appDir: join(
-            process.env.LOCALAPPDATA || (
-                process.platform == 'darwin' ? join(os.homedir(), "Library", "Application Support") :
+        appDir: process.env.LOCAL_APP_DATA ?? join(
+            process.platform == 'darwin' ? join(os.homedir(), "Library", "Application Support") :
                 process.platform == 'linux' ? join(os.homedir(), '.config') :
-                os.homedir()
-            ),
+                    os.homedir(),
             "lam-backend"
         ),
         database: {
