@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import columnDateOptions from "src/shared/decorators/column-date-options";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeUpdate, Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ScriptVersionEntity } from "./script-version.entity";
 import { ScriptRunStatusEnum } from "../enums/script-run-status.enum";
 import { EnvEntity } from "src/env/entities/env.entity";
@@ -69,4 +69,12 @@ export class ScriptRunEntity {
   })
   @Type(() => Date)
   finishedAt!: Date;
+
+  @BeforeUpdate()
+  updateFinishedAt() {
+    const finishedStatuses = [ScriptRunStatusEnum.Cancelled, ScriptRunStatusEnum.Failed, ScriptRunStatusEnum.Succeeded];
+    if (finishedStatuses.includes(this.status) && !this.finishedAt) {
+      this.finishedAt = new Date();
+    }
+  }
 }

@@ -198,7 +198,7 @@ export class ScriptsRunsService {
     // NOTE: Intellisense and Typescript loses type shape context
     // each "object level" needs to be casted
 
-    const { scriptId, scriptVersionId } = dto.filtering || {};
+    const { scriptId, scriptVersionId, status } = dto.filtering || {};
     const filters: FindOptionsWhere<ScriptRunEntity> = {};
 
     if (scriptId) {
@@ -220,6 +220,10 @@ export class ScriptsRunsService {
           filters.scriptVersion
         ).script
       ).id = scriptId
+    }
+
+    if (status) {
+      filters.status = status
     }
 
     return {

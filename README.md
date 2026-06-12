@@ -1,11 +1,43 @@
 # LAM Backend
 
-[![E2E](https://github.com/FunnyPaper/LAM-Backend/actions/workflows/test.e2e.yml/badge.svg)](https://github.com/FunnyPaper/particle-emitter/actions/workflows/test.e2e.yml) [![Unit](https://github.com/FunnyPaper/LAM-Backend/actions/workflows/test.unit.yml/badge.svg)](https://github.com/FunnyPaper/LAM-Backend/actions/workflows/test.unit.yml) [![GitHub Release](https://img.shields.io/github/v/release/FunnyPaper/LAM-Backend)](https://github.com/FunnyPaper/LAM-Backend/releases/latest)
-[![GitHub License](https://img.shields.io/github/license/FunnyPaper/LAM-Backend)](https://github.com/FunnyPaper/LAM-Backend/blob/main/LICENSE)
+NestJS-based backend service for LAM, providing gRPC microservices, REST API, WebSocket communication, and database management.
+
+## Badges
+
+[![GitHub Release](https://img.shields.io/github/v/release/FunnyPaper/LAM?label=backend)](https://github.com/FunnyPaper/LAM/releases)
+[![GitHub License](https://img.shields.io/github/license/FunnyPaper/LAM)](https://github.com/FunnyPaper/LAM/blob/main/LICENSE)
 
 ## Description
 
-To be added...
+The LAM Backend is a Node.js service built with NestJS that handles business logic, data persistence, and inter-service communication. It uses gRPC for protobuf-based microservice communication, TypeORM for database operations (PostgreSQL/SQLite), and supports both local and remote deployment via Docker.
+
+## Project Structure
+
+```
+packages/lam/backend/
+├── src/                    # NestJS application source
+│   ├── main-app.ts         # Application entry point
+│   ├── main-cli.ts         # CLI entry point
+│   ├── database/            # Database configuration
+│   └── ...                 # Modules, controllers, services
+├── test/                   # E2E and unit tests
+├── migrations/              # Database migrations
+├── scripts/                 # Build scripts
+├── installer/               # Windows installer config
+├── package.json             # npm dependencies
+├── tsconfig.json            # TypeScript configuration
+└── docker-compose*.yml      # Docker configurations
+```
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 24.x or later
+- [npm](https://www.npmjs.com/) 9.x or later
+- [Docker](https://www.docker.com/) (optional, for containerized deployment)
+- [Buf](https://buf.build/) (for protobuf code generation)
+- [Nasm](https://www.nasm.us/pub/nasm/releasebuilds/) (for compiling Node into executable). It is recommended to use the newest version available.
+- [Python](https://www.python.org/downloads/) (for compiling Node into executable). It is recommended to use Python 3.11.x. Building was tested on Python 3.11.9.
+- [Visual Studio](https://visualstudio.microsoft.com/downloads/) (for compiling Node into executable). It needs C++ classic app development and Clang/LLVm support. It is recommended to use Visual Studio 2022 or later.
 
 ## Project setup
 
