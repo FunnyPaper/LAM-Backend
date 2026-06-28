@@ -6,7 +6,7 @@ import { resolve } from "path";
 
 async function bootstrap() {
     await CommandFactory.run(
-        CommandModule.register(() => configuration(resolve(process.cwd(), '.env'))),
+        CommandModule.register(() => configuration(resolve(process.cwd(), process.argv[3] ?? '.env'))),
         ['warn', 'error']
     );
 }
