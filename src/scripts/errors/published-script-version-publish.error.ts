@@ -1,4 +1,4 @@
-import { DomainError, DomainErrorCodes } from "src/shared/errors/domain.error";
+import { DomainError, DomainErrorCodes } from 'src/shared/errors/domain.error';
 
 export class PublishedScriptVersionPublishError extends DomainError {
   public constructor(
@@ -9,7 +9,7 @@ export class PublishedScriptVersionPublishError extends DomainError {
     super(
       `Attempted to publish version with status Published. Only drafts and archived versions can be published.`,
       DomainErrorCodes.publishedScriptVersionUpdate,
-      { userId, scriptId, scriptVersionId }
-    )
+      { userId, scriptId, scriptVersionId },
+    );
   }
 }

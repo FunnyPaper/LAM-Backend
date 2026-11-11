@@ -1,17 +1,20 @@
 import { LogType } from './../../proto/worker';
-import PQueue from "p-queue";
-import { Injectable } from "@nestjs/common";
-import { ScriptsRunsGrpcClientService } from "../scripts-runs-grpc-client.service";
-import { ScriptRunStatusEnum } from "../enums/script-run-status.enum";
-import { JobEventType, JobStatus, StatusType } from "src/proto/worker";
-import { ScriptRunGateway } from "../gateways/script-run.gateway";
-import { InjectRepository } from "@nestjs/typeorm";
-import { ScriptRunEntity } from "../entities/script-run.entity";
-import { Repository } from "typeorm";
-import { ScriptRunResultEntity } from "../entities/script-run-result.entity";
-import { AuthService } from "src/auth/auth.service";
-import { ConfigService } from "@nestjs/config";
-import { ConfigurationType, ScriptsConfiguration } from "src/configuration/types/configuration.type";
+import PQueue from 'p-queue';
+import { Injectable } from '@nestjs/common';
+import { ScriptsRunsGrpcClientService } from '../scripts-runs-grpc-client.service';
+import { ScriptRunStatusEnum } from '../enums/script-run-status.enum';
+import { JobEventType, JobStatus, StatusType } from 'src/proto/worker';
+import { ScriptRunGateway } from '../gateways/script-run.gateway';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ScriptRunEntity } from '../entities/script-run.entity';
+import { Repository } from 'typeorm';
+import { ScriptRunResultEntity } from '../entities/script-run-result.entity';
+import { AuthService } from 'src/auth/auth.service';
+import { ConfigService } from '@nestjs/config';
+import {
+  ConfigurationType,
+  ScriptsConfiguration,
+} from 'src/configuration/types/configuration.type';
 
 const statusMapper = {
   [JobStatus.CANCELLING]: ScriptRunStatusEnum.Cancelling,
@@ -19,7 +22,7 @@ const statusMapper = {
   [JobStatus.COMPLETED]: ScriptRunStatusEnum.Succeeded,
   [JobStatus.FAILED]: ScriptRunStatusEnum.Failed,
   [JobStatus.RUNNING]: ScriptRunStatusEnum.Running,
-  [JobStatus.STARTED]: ScriptRunStatusEnum.Running
+  [JobStatus.STARTED]: ScriptRunStatusEnum.Running,
 } as const;
 
 const logTypeMapper = {
@@ -30,12 +33,11 @@ const logTypeMapper = {
 
 const resultUpdateTypeMapper = {
   [StatusType.FULL]: 'full',
-  [StatusType.PARTIAL]: 'partial'
+  [StatusType.PARTIAL]: 'partial',
 } as const;
 
 @Injectable()
 export class ScriptsRunsProcessor {
-
   private queue: PQueue;
   private pendingRuns: Set<string>;
 
@@ -49,11 +51,11 @@ export class ScriptsRunsProcessor {
     private readonly grpcClientService: ScriptsRunsGrpcClientService,
     private readonly gateway: ScriptRunGateway,
     private readonly authService: AuthService,
-    configService: ConfigService<ConfigurationType>
+    configService: ConfigService<ConfigurationType>,
   ) {
     const scripts: ScriptsConfiguration = configService.get('scripts')!;
     this.queue = new PQueue({
-      concurrency: scripts.concurrency
+      concurrency: scripts.concurrency,
     });
 
     this.pendingRuns = new Set();
@@ -74,11 +76,13 @@ export class ScriptsRunsProcessor {
     runId: string,
     userId: string,
     script: Record<string, any>,
-    env: Record<string, any> | undefined
+    env: Record<string, any> | undefined,
   ) {
     if (!this.pendingRuns.has(runId)) return;
 
-    const token = this.authService.createGrpcToken(userId, ['run:start'], { runId: runId });
+    const token = this.authService.createGrpcToken(userId, ['run:start'], {
+      runId: runId,
+    });
     const stream = this.grpcClientService.startJob(runId, script, env, token);
 
     await new Promise<void>((resolve) => {
@@ -86,7 +90,7 @@ export class ScriptsRunsProcessor {
         next: async (event) => {
           const currentRun = await this.scriptsRunsRepo.findOne({
             where: { id: runId },
-            relations: { result: true }
+            relations: { result: true },
           });
 
           switch (event.type) {
@@ -97,8 +101,8 @@ export class ScriptsRunsProcessor {
               await this.scriptsRunsRepo.save(currentRun!);
 
               this.gateway.emitRunEvent(runId, {
-                type: "status",
-                status: statusMapper[status]
+                type: 'status',
+                status: statusMapper[status],
               });
               break;
             }
@@ -109,7 +113,7 @@ export class ScriptsRunsProcessor {
                 case StatusType.PARTIAL:
                   data = [
                     ...(currentRun?.result?.data ?? []),
-                    ...(event.payload!.data ?? [])
+                    ...(event.payload!.data ?? []),
                   ];
                   break;
                 case StatusType.FULL:
@@ -117,24 +121,26 @@ export class ScriptsRunsProcessor {
                   break;
               }
 
-              await this.scriptsRunsResultsRepo.update(currentRun!.id, { data: data! });
+              await this.scriptsRunsResultsRepo.update(currentRun!.id, {
+                data: data!,
+              });
 
               this.gateway.emitRunEvent(runId, {
-                type: "resultUpdate",
+                type: 'resultUpdate',
                 change: {
                   type: resultUpdateTypeMapper[event.payload!.type],
-                  data: event.payload!.data
-                }
+                  data: event.payload!.data,
+                },
               });
               break;
             }
             case JobEventType.LOG: {
               this.gateway.emitRunEvent(runId, {
-                type: "log",
+                type: 'log',
                 log: {
                   type: logTypeMapper[event.log!.type],
-                  message: event.log!.message
-                }
+                  message: event.log!.message,
+                },
               });
               break;
             }
@@ -144,14 +150,13 @@ export class ScriptsRunsProcessor {
 
         error: (err) => {
           this.gateway.emitRunEvent(runId, {
-            type: "status",
-            status: ScriptRunStatusEnum.Failed
+            type: 'status',
+            status: ScriptRunStatusEnum.Failed,
           });
           resolve();
         },
-        complete: resolve
+        complete: resolve,
       });
-
     });
 
     this.pendingRuns.delete(runId);
@@ -163,25 +168,25 @@ export class ScriptsRunsProcessor {
     if (this.pendingRuns.has(runId)) {
       await new Promise<void>((resolve) => {
         this.gateway.emitRunEvent(runId, {
-          type: "status",
-          status: ScriptRunStatusEnum.Cancelling
+          type: 'status',
+          status: ScriptRunStatusEnum.Cancelling,
         });
 
         this.grpcClientService.cancelJob(runId, token).subscribe({
           error: () => {
             this.gateway.emitRunEvent(runId, {
-              type: "status",
-              status: ScriptRunStatusEnum.Failed
+              type: 'status',
+              status: ScriptRunStatusEnum.Failed,
             });
             resolve();
           },
           complete: () => {
             this.gateway.emitRunEvent(runId, {
-              type: "status",
-              status: ScriptRunStatusEnum.Cancelled
+              type: 'status',
+              status: ScriptRunStatusEnum.Cancelled,
             });
             resolve();
-          }
+          },
         });
       });
     }

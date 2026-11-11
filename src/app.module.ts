@@ -12,24 +12,24 @@ import { EnvModule } from './env/env.module';
 import { ConfigurationType } from './configuration/types/configuration.type';
 
 @Module({
-    imports: [
-        SharedModule,
-        ScheduleModule.forRoot(),
-        AccessControlModule.forRoles(appRoles),
-        AuthModule,
-        UsersModule,
-        DatabaseModule,
-        ScriptsModule,
-        EnvModule,
-    ],
+  imports: [
+    SharedModule,
+    ScheduleModule.forRoot(),
+    AccessControlModule.forRoles(appRoles),
+    AuthModule,
+    UsersModule,
+    DatabaseModule,
+    ScriptsModule,
+    EnvModule,
+  ],
 })
 export class AppModule {
-    static register(configuration: () => Promise<ConfigurationType> | ConfigurationType): DynamicModule {
-        return {
-            module: AppModule,
-            imports: [
-                ConfigurationModule.register(configuration)
-            ]
-        }
-    }
+  static register(
+    configuration: () => Promise<ConfigurationType> | ConfigurationType,
+  ): DynamicModule {
+    return {
+      module: AppModule,
+      imports: [ConfigurationModule.register(configuration)],
+    };
+  }
 }

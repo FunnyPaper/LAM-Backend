@@ -1,8 +1,8 @@
 export enum ScriptRunStatusEnum {
-    Queued = "Queued",
-    Running = "Running",
-    Succeeded = "Succeeded",
-    Failed = "Failed",
-    Cancelled = "Cancelled",
-    Cancelling = "Cancelling"
+  Queued = 'Queued',
+  Running = 'Running',
+  Succeeded = 'Succeeded',
+  Failed = 'Failed',
+  Cancelled = 'Cancelled',
+  Cancelling = 'Cancelling',
 }

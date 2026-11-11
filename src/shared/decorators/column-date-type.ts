@@ -1,1 +1,1 @@
-export default (type: string) => type == 'postgres' ? 'timestamptz' : 'text';
+export default (type: string) => (type == 'postgres' ? 'timestamptz' : 'text');

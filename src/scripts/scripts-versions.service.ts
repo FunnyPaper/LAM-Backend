@@ -1,5 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { ScriptVersionEntity } from './entities/script-version.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ScriptsService } from './scripts.service';
@@ -26,9 +31,13 @@ export class ScriptsVersionsService {
     private readonly scriptsVersionsRepo: Repository<ScriptVersionEntity>,
     @Inject(forwardRef(() => ScriptsService))
     private readonly scriptsService: ScriptsService,
-  ) { }
+  ) {}
 
-  public async create(userId: string, scriptId: string, dto: CreateScriptVersionDto): Promise<ScriptVersionEntity> {
+  public async create(
+    userId: string,
+    scriptId: string,
+    dto: CreateScriptVersionDto,
+  ): Promise<ScriptVersionEntity> {
     const script = await this.scriptsService.findById(userId, scriptId);
 
     const lastVersion = await this.findLastVersion(userId, scriptId);
@@ -37,7 +46,7 @@ export class ScriptsVersionsService {
       ...dto,
       versionNumber: (lastVersion?.versionNumber ?? 0) + 1,
       status: ScriptVersionStatusEnum.Draft,
-      script
+      script,
     });
 
     return this.scriptsVersionsRepo.save(version);
@@ -48,23 +57,35 @@ export class ScriptsVersionsService {
       content: {
         astJson: {},
         astVersion: 1,
-        engineVersion: 1
+        engineVersion: 1,
       },
       source: {
         format: ScriptSourceFormatEnum.Json,
-        content: '{}'
-      }
+        content: '{}',
+      },
     });
   }
 
-  public findAll(userId: string, scriptId: string, dto: QueryScriptVersionDto): Promise<ScriptVersionEntity[] | PaginatedScriptVersionDto> {
+  public findAll(
+    userId: string,
+    scriptId: string,
+    dto: QueryScriptVersionDto,
+  ): Promise<ScriptVersionEntity[] | PaginatedScriptVersionDto> {
     return dto.pagination
-      // Typescript is dumb enough to not take narrowing into account here
-      ? this.findAllPaginated(userId, scriptId, <Require<QueryScriptVersionDto, 'pagination'>>dto)
+      ? // Typescript is dumb enough to not take narrowing into account here
+        this.findAllPaginated(
+          userId,
+          scriptId,
+          <Require<QueryScriptVersionDto, 'pagination'>>dto,
+        )
       : this.findAllNonPaginated(userId, scriptId, dto);
   }
 
-  public findAllNonPaginated(userId: string, scriptId: string, dto: QueryScriptVersionDto): Promise<ScriptVersionEntity[]> {
+  public findAllNonPaginated(
+    userId: string,
+    scriptId: string,
+    dto: QueryScriptVersionDto,
+  ): Promise<ScriptVersionEntity[]> {
     const where = this.parseWhere(userId, scriptId, dto);
     const relations = this.parseRelations(userId, scriptId, dto);
     const order = this.parseOrder(userId, scriptId, dto);
@@ -72,42 +93,56 @@ export class ScriptsVersionsService {
     return this.scriptsVersionsRepo.find({ where, order, relations });
   }
 
-  public async findAllPaginated(userId: string, scriptId: string, dto: Require<QueryScriptVersionDto, 'pagination'>): Promise<PaginatedScriptVersionDto> {
+  public async findAllPaginated(
+    userId: string,
+    scriptId: string,
+    dto: Require<QueryScriptVersionDto, 'pagination'>,
+  ): Promise<PaginatedScriptVersionDto> {
     const where = this.parseWhere(userId, scriptId, dto);
     const relations = this.parseRelations(userId, scriptId, dto);
     const order = this.parseOrder(userId, scriptId, dto);
     const [take, skip] = this.parsePagination(dto.pagination);
 
-    const [data, totalItems] = await this.scriptsVersionsRepo.findAndCount({ where, order, relations, take, skip });
+    const [data, totalItems] = await this.scriptsVersionsRepo.findAndCount({
+      where,
+      order,
+      relations,
+      take,
+      skip,
+    });
     return {
       data,
       metadata: {
         page: dto.pagination.page,
         limit: dto.pagination.limit,
         totalItems: totalItems,
-        totalPages: Math.ceil(totalItems / dto.pagination.limit)
-      }
-    }
+        totalPages: Math.ceil(totalItems / dto.pagination.limit),
+      },
+    };
   }
 
-  public async findById(userId: string, scriptId: string, versionId: string): Promise<ScriptVersionEntity> {
+  public async findById(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.scriptsVersionsRepo.findOne({
       where: {
         id: versionId,
         script: {
           id: scriptId,
           owner: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       relations: {
         script: {
-          owner: true
+          owner: true,
         },
         content: true,
-        source: true
-      }
+        source: true,
+      },
     });
 
     if (!version) {
@@ -117,23 +152,26 @@ export class ScriptsVersionsService {
     return version;
   }
 
-  public async findOneByUsersVersionId(userId: string, versionId: string): Promise<ScriptVersionEntity> {
+  public async findOneByUsersVersionId(
+    userId: string,
+    versionId: string,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.scriptsVersionsRepo.findOne({
       where: {
         id: versionId,
         script: {
           owner: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       relations: {
         script: {
-          owner: true
+          owner: true,
         },
         content: true,
-        source: true
-      }
+        source: true,
+      },
     });
 
     if (!version) {
@@ -143,22 +181,36 @@ export class ScriptsVersionsService {
     return version;
   }
 
-  public async update(userId: string, scriptId: string, versionId: string, dto: UpdateScriptVersionDto): Promise<ScriptVersionEntity> {
+  public async update(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+    dto: UpdateScriptVersionDto,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.findById(userId, scriptId, versionId);
 
     if (version.status != ScriptVersionStatusEnum.Draft) {
-      throw new NonDraftScriptVersionUpdateError(userId, scriptId, versionId, version.status);
+      throw new NonDraftScriptVersionUpdateError(
+        userId,
+        scriptId,
+        versionId,
+        version.status,
+      );
     }
 
     const result = await this.scriptsVersionsRepo.save({
       ...version,
-      ...dto
+      ...dto,
     });
 
     return result;
   }
 
-  public async fork(userId: string, scriptId: string, versionId: string): Promise<ScriptVersionEntity> {
+  public async fork(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.findById(userId, scriptId, versionId);
 
     const lastVersion = await this.findLastVersion(userId, scriptId);
@@ -167,13 +219,18 @@ export class ScriptsVersionsService {
       ...version,
       id: undefined,
       status: ScriptVersionStatusEnum.Draft,
-      versionNumber: (lastVersion?.versionNumber ?? 0) + 1
+      versionNumber: (lastVersion?.versionNumber ?? 0) + 1,
     });
 
     return this.scriptsVersionsRepo.save(result);
   }
 
-  public async publish(userId: string, scriptId: string, versionId: string, dto: PublishScriptVersionDto): Promise<ScriptVersionEntity> {
+  public async publish(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+    dto: PublishScriptVersionDto,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.findById(userId, scriptId, versionId);
 
     if (version.status == ScriptVersionStatusEnum.Published) {
@@ -183,28 +240,41 @@ export class ScriptsVersionsService {
     const result = await this.scriptsVersionsRepo.save({
       ...version,
       ...dto,
-      status: ScriptVersionStatusEnum.Published
+      status: ScriptVersionStatusEnum.Published,
     });
 
     return result;
   }
 
-  public async archive(userId: string, scriptId: string, versionId: string): Promise<ScriptVersionEntity> {
+  public async archive(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+  ): Promise<ScriptVersionEntity> {
     const version = await this.findById(userId, scriptId, versionId);
 
     if (version.status == ScriptVersionStatusEnum.Archived) {
-      throw new ArchivedScriptVersionArchiveError(userId, scriptId, versionId, version.status);
+      throw new ArchivedScriptVersionArchiveError(
+        userId,
+        scriptId,
+        versionId,
+        version.status,
+      );
     }
 
     const result = await this.scriptsVersionsRepo.save({
       ...version,
-      status: ScriptVersionStatusEnum.Archived
+      status: ScriptVersionStatusEnum.Archived,
     });
 
     return result;
   }
 
-  public async remove(userId: string, scriptId: string, versionId: string): Promise<void> {
+  public async remove(
+    userId: string,
+    scriptId: string,
+    versionId: string,
+  ): Promise<void> {
     const version = await this.findById(userId, scriptId, versionId);
 
     await this.scriptsVersionsRepo.delete(version.id);
@@ -214,16 +284,16 @@ export class ScriptsVersionsService {
         script: {
           id: scriptId,
           owner: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       relations: {
         script: {
-          owner: true
-        }
+          owner: true,
+        },
       },
-    })
+    });
 
     // There should be always one empty draft version
     if (count == 0) {
@@ -231,30 +301,37 @@ export class ScriptsVersionsService {
     }
   }
 
-  private findLastVersion(userId: string, scriptId: string): Promise<ScriptVersionEntity | null> {
+  private findLastVersion(
+    userId: string,
+    scriptId: string,
+  ): Promise<ScriptVersionEntity | null> {
     return this.scriptsVersionsRepo.findOne({
       where: {
         script: {
           id: scriptId,
           owner: {
-            id: userId
-          }
-        }
+            id: userId,
+          },
+        },
       },
       relations: {
         script: {
-          owner: true
-        }
+          owner: true,
+        },
       },
       order: {
         versionNumber: {
-          direction: 'DESC'
-        }
-      }
+          direction: 'DESC',
+        },
+      },
     });
   }
 
-  private parseRelations(userId: string, scriptId: string, dto: QueryScriptVersionDto): FindOptionsRelations<ScriptVersionEntity> {
+  private parseRelations(
+    userId: string,
+    scriptId: string,
+    dto: QueryScriptVersionDto,
+  ): FindOptionsRelations<ScriptVersionEntity> {
     const { runId } = dto.filtering || {};
     const include = dto.include || [];
     const relations: FindOptionsRelations<ScriptVersionEntity> = {};
@@ -272,13 +349,17 @@ export class ScriptsVersionsService {
 
     return {
       script: {
-        owner: true
+        owner: true,
       },
-      ...relations
-    }
+      ...relations,
+    };
   }
 
-  private parseWhere(userId: string, scriptId: string, dto: QueryScriptVersionDto): FindOptionsWhere<ScriptVersionEntity> {
+  private parseWhere(
+    userId: string,
+    scriptId: string,
+    dto: QueryScriptVersionDto,
+  ): FindOptionsWhere<ScriptVersionEntity> {
     // NOTE: Intellisense and Typescript loses type shape context
     // each "object level" needs to be casted
 
@@ -288,26 +369,22 @@ export class ScriptsVersionsService {
     if (content) {
       if (content.engineVersion != null) {
         filters.content ??= {};
-        (<FindOptionsWhere<ScriptContentEntity>>
-          filters.content
-        ).engineVersion = content.engineVersion;
+        (<FindOptionsWhere<ScriptContentEntity>>filters.content).engineVersion =
+          content.engineVersion;
       }
     }
 
     if (source) {
       if (source.format) {
         filters.source ??= {};
-        (<FindOptionsWhere<ScriptSourceEntity>>
-          filters.source
-        ).format = source.format;
+        (<FindOptionsWhere<ScriptSourceEntity>>filters.source).format =
+          source.format;
       }
     }
 
     if (runId) {
       filters.runs ??= {};
-      (<FindOptionsWhere<ScriptRunEntity>>
-        filters.runs
-      ).id = runId;
+      (<FindOptionsWhere<ScriptRunEntity>>filters.runs).id = runId;
     }
 
     if (status) {
@@ -318,14 +395,18 @@ export class ScriptsVersionsService {
       script: {
         id: scriptId,
         owner: {
-          id: userId
-        }
+          id: userId,
+        },
       },
-      ...filters
+      ...filters,
     };
   }
 
-  private parseOrder(userId: string, scriptId: string, dto: QueryScriptVersionDto): FindOptionsOrder<ScriptVersionEntity> {
+  private parseOrder(
+    userId: string,
+    scriptId: string,
+    dto: QueryScriptVersionDto,
+  ): FindOptionsOrder<ScriptVersionEntity> {
     // NOTE: Intellisense and Typescript loses type shape context
     // each "object level" needs to be casted
 
@@ -348,7 +429,9 @@ export class ScriptsVersionsService {
     return order;
   }
 
-  private parsePagination(dto: NonNullable<QueryScriptVersionDto['pagination']>): [number, number] {
+  private parsePagination(
+    dto: NonNullable<QueryScriptVersionDto['pagination']>,
+  ): [number, number] {
     return [dto.limit, (dto.page - 1) * dto.limit];
   }
 }

@@ -16,7 +16,7 @@ export class DynamicIoAdapter extends IoAdapter {
       cors: {
         origin: this.dynamicOrigin,
         transports: ['polling', 'websocket'],
-        credentials: true
+        credentials: true,
       },
     };
     return super.createIOServer(port, optionsWithDynamicOrigin);

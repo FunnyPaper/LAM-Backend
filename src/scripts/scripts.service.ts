@@ -1,7 +1,13 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateScriptDto } from './dto/create-script.dto';
 import { UpdateScriptDto } from './dto/update-script.dto';
-import { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere, Like, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsWhere,
+  Like,
+  Repository,
+} from 'typeorm';
 import { ScriptEntity } from './entities/script.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
@@ -25,32 +31,44 @@ export class ScriptsService {
     private readonly scriptsVersionService: ScriptsVersionsService,
     private readonly usersService: UsersService,
     private readonly grpcClientService: ScriptsRunsGrpcClientService,
-    private readonly authService: AuthService
-  ) { }
+    private readonly authService: AuthService,
+  ) {}
 
-  public async create(userId: string, createScriptDto: CreateScriptDto): Promise<ScriptEntity> {
+  public async create(
+    userId: string,
+    createScriptDto: CreateScriptDto,
+  ): Promise<ScriptEntity> {
     const user = await this.usersService.findById(userId);
 
     const script = this.scriptsRepo.create({
       ...createScriptDto,
-      owner: user
+      owner: user,
     });
 
     const scriptEntity = await this.scriptsRepo.save(script);
 
     await this.scriptsVersionService.createEmpty(userId, scriptEntity.id);
 
-    return scriptEntity
+    return scriptEntity;
   }
 
-  public findAll(userId: string, dto: QueryScriptDto): Promise<ScriptEntity[] | PaginatedScriptDto> {
+  public findAll(
+    userId: string,
+    dto: QueryScriptDto,
+  ): Promise<ScriptEntity[] | PaginatedScriptDto> {
     return dto.pagination
-      // Typescript is dumb enough to not take narrowing into account here
-      ? this.findAllPaginated(userId, <Require<QueryScriptDto, 'pagination'>>dto)
+      ? // Typescript is dumb enough to not take narrowing into account here
+        this.findAllPaginated(
+          userId,
+          <Require<QueryScriptDto, 'pagination'>>dto,
+        )
       : this.findAllNonPaginated(userId, dto);
   }
 
-  public findAllNonPaginated(userId: string, dto: QueryScriptDto): Promise<ScriptEntity[]> {
+  public findAllNonPaginated(
+    userId: string,
+    dto: QueryScriptDto,
+  ): Promise<ScriptEntity[]> {
     const where = this.parseWhere(userId, dto);
     const relations = this.parseRelations(userId, dto);
     const order = this.parseOrder(userId, dto);
@@ -58,36 +76,48 @@ export class ScriptsService {
     return this.scriptsRepo.find({ where, order, relations });
   }
 
-  public async findAllPaginated(userId: string, dto: Require<QueryScriptDto, 'pagination'>): Promise<PaginatedScriptDto> {
+  public async findAllPaginated(
+    userId: string,
+    dto: Require<QueryScriptDto, 'pagination'>,
+  ): Promise<PaginatedScriptDto> {
     const where = this.parseWhere(userId, dto);
     const relations = this.parseRelations(userId, dto);
     const order = this.parseOrder(userId, dto);
     const [take, skip] = this.parsePagination(dto.pagination);
 
-    const [data, totalItems] = await this.scriptsRepo.findAndCount({ where, order, relations, take, skip });
+    const [data, totalItems] = await this.scriptsRepo.findAndCount({
+      where,
+      order,
+      relations,
+      take,
+      skip,
+    });
     return {
       data,
       metadata: {
         page: dto.pagination.page,
         limit: dto.pagination.limit,
         totalItems: totalItems,
-        totalPages: Math.ceil(totalItems / dto.pagination.limit)
-      }
-    }
+        totalPages: Math.ceil(totalItems / dto.pagination.limit),
+      },
+    };
   }
 
-  public async findById(userId: string, scriptId: string): Promise<ScriptEntity> {
+  public async findById(
+    userId: string,
+    scriptId: string,
+  ): Promise<ScriptEntity> {
     const script = await this.scriptsRepo.findOne({
       where: {
         id: scriptId,
         owner: {
-          id: userId
-        }
+          id: userId,
+        },
       },
       relations: {
         owner: true,
-        versions: true
-      }
+        versions: true,
+      },
     });
 
     if (!script) {
@@ -97,13 +127,17 @@ export class ScriptsService {
     return script;
   }
 
-  public async update(userId: string, scriptId: string, dto: UpdateScriptDto): Promise<ScriptEntity> {
+  public async update(
+    userId: string,
+    scriptId: string,
+    dto: UpdateScriptDto,
+  ): Promise<ScriptEntity> {
     const script = await this.findById(userId, scriptId);
 
     const result = await this.scriptsRepo.save({
       ...script,
-      ...dto
-    })
+      ...dto,
+    });
 
     return result;
   }
@@ -115,11 +149,16 @@ export class ScriptsService {
 
   public async getScriptValidationSchema(userId: string, version: string) {
     const token = this.authService.createGrpcToken(userId, ['script:validate']);
-    const response = await firstValueFrom(this.grpcClientService.getScriptValidationSchema(version, token));
+    const response = await firstValueFrom(
+      this.grpcClientService.getScriptValidationSchema(version, token),
+    );
     return response;
   }
 
-  private parseRelations(userId: string, dto: QueryScriptDto): FindOptionsRelations<ScriptEntity> {
+  private parseRelations(
+    userId: string,
+    dto: QueryScriptDto,
+  ): FindOptionsRelations<ScriptEntity> {
     const { scriptVersionId, runId } = dto.filtering || {};
     const include = dto.include || [];
     const relations: FindOptionsRelations<ScriptEntity> = {};
@@ -142,11 +181,14 @@ export class ScriptsService {
 
     return {
       owner: true,
-      ...relations
+      ...relations,
     };
   }
 
-  private parseWhere(userId: string, dto: QueryScriptDto): FindOptionsWhere<ScriptEntity> {
+  private parseWhere(
+    userId: string,
+    dto: QueryScriptDto,
+  ): FindOptionsWhere<ScriptEntity> {
     // NOTE: Intellisense and Typescript loses type shape context
     // each "object level" needs to be casted
 
@@ -159,44 +201,45 @@ export class ScriptsService {
 
     if (scriptVersionId) {
       filters.versions ??= {};
-      (<FindOptionsWhere<ScriptVersionEntity>>
-        filters.versions
-      ).id = scriptVersionId;
+      (<FindOptionsWhere<ScriptVersionEntity>>filters.versions).id =
+        scriptVersionId;
     }
 
     if (runId) {
       filters.versions ??= {};
-      (<FindOptionsWhere<ScriptVersionEntity>>
-        filters.versions
-      ).runs ??= {};
+      (<FindOptionsWhere<ScriptVersionEntity>>filters.versions).runs ??= {};
 
-      (<FindOptionsWhere<ScriptRunEntity>>
-        (<FindOptionsWhere<ScriptVersionEntity>>
-          filters.versions
-        ).runs).id = runId;
+      (<FindOptionsWhere<ScriptRunEntity>>(
+        (<FindOptionsWhere<ScriptVersionEntity>>filters.versions).runs
+      )).id = runId;
     }
 
     return {
       owner: {
-        id: userId
+        id: userId,
       },
-      ...filters
-    }
+      ...filters,
+    };
   }
 
-  private parseOrder(userId: string, dto: QueryScriptDto): FindOptionsOrder<ScriptEntity> {
+  private parseOrder(
+    userId: string,
+    dto: QueryScriptDto,
+  ): FindOptionsOrder<ScriptEntity> {
     const order: FindOptionsOrder<ScriptEntity> = {};
 
     if (dto.sorting) {
       order[dto.sorting.sortBy] = {
-        direction: dto.sorting.order
-      }
+        direction: dto.sorting.order,
+      };
     }
 
     return order;
   }
 
-  private parsePagination(dto: NonNullable<QueryScriptDto['pagination']>): [number, number] {
+  private parsePagination(
+    dto: NonNullable<QueryScriptDto['pagination']>,
+  ): [number, number] {
     return [dto.limit, (dto.page - 1) * dto.limit];
   }
 }

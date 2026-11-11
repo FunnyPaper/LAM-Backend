@@ -7,12 +7,9 @@ import { EnvEntity } from './entities/env.entity';
 import { EnvSelfController } from './env.self.controller';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([EnvEntity]),
-        UsersModule
-    ],
-    controllers: [EnvSelfController, EnvAnyController],
-    providers: [EnvService],
-    exports: [EnvService]
+  imports: [TypeOrmModule.forFeature([EnvEntity]), UsersModule],
+  controllers: [EnvSelfController, EnvAnyController],
+  providers: [EnvService],
+  exports: [EnvService],
 })
-export class EnvModule { }
+export class EnvModule {}

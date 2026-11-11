@@ -1,9 +1,17 @@
-import columnDateOptions from "../../shared/decorators/column-date-options";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Type } from "class-transformer";
-import { UserEntity } from "../../users/entities/user.entity";
-import { columnJsonType } from "src/shared/decorators/column-json-type";
-import { ScriptRunEntity } from "src/scripts/entities/script-run.entity";
+import columnDateOptions from '../../shared/decorators/column-date-options';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Type } from 'class-transformer';
+import { UserEntity } from '../../users/entities/user.entity';
+import { columnJsonType } from 'src/shared/decorators/column-json-type';
+import { ScriptRunEntity } from 'src/scripts/entities/script-run.entity';
 
 const dateOptions = columnDateOptions(process.env.DB_TYPE!);
 const jsonType = columnJsonType(process.env.DB_TYPE!);
@@ -14,7 +22,7 @@ export class EnvEntity {
   id!: string;
 
   @ManyToOne(() => UserEntity, (owner) => owner.envs, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   owner!: UserEntity;
 

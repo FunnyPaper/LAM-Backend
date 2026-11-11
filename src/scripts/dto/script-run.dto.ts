@@ -1,9 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ScriptRunStatusEnum } from "../enums/script-run-status.enum";
-import { ScriptRunResultDto } from "./script-run-result.dto";
-import { Expose, Type } from "class-transformer";
-import { ScriptVersionSnapshotDto } from "./script-version-snapshot.dto";
-import { EnvSnapshotDto } from "./env-snapshot.dto";
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ScriptRunStatusEnum } from '../enums/script-run-status.enum';
+import { ScriptRunResultDto } from './script-run-result.dto';
+import { Expose, Type } from 'class-transformer';
+import { ScriptVersionSnapshotDto } from './script-version-snapshot.dto';
+import { EnvSnapshotDto } from './env-snapshot.dto';
 
 export class ScriptRunDto {
   @ApiProperty()

@@ -1,5 +1,8 @@
-import { ConfigurationType, DatabaseConfiguration } from '../configuration/types/configuration.type';
-import { ConfigService } from "@nestjs/config";
+import {
+  ConfigurationType,
+  DatabaseConfiguration,
+} from '../configuration/types/configuration.type';
+import { ConfigService } from '@nestjs/config';
 import { UserEntity } from '../users/entities/user.entity';
 import { RefreshTokenEntity } from '../tokens/entities/refresh-token.entity';
 import { DataSourceOptions } from 'typeorm';
@@ -13,42 +16,42 @@ import { ScriptContentEntity } from 'src/scripts/entities/script-content.entity'
 import { resolve } from 'path';
 
 export const ormconfig = (
-    configService: ConfigService<ConfigurationType>
+  configService: ConfigService<ConfigurationType>,
 ): DataSourceOptions => {
-    const cwd = configService.get<string>('cwd')!;
-    const appDir = configService.get<string>('appDir')!;
-    const dbConfig = configService.get<DatabaseConfiguration>('database')!;
-    const entities = [
-        UserEntity,
-        RefreshTokenEntity,
-        EnvEntity,
-        ScriptEntity,
-        ScriptVersionEntity,
-        ScriptSourceEntity,
-        ScriptRunEntity,
-        ScriptRunResultEntity,
-        ScriptContentEntity
-    ]
+  const cwd = configService.get<string>('cwd')!;
+  const appDir = configService.get<string>('appDir')!;
+  const dbConfig = configService.get<DatabaseConfiguration>('database')!;
+  const entities = [
+    UserEntity,
+    RefreshTokenEntity,
+    EnvEntity,
+    ScriptEntity,
+    ScriptVersionEntity,
+    ScriptSourceEntity,
+    ScriptRunEntity,
+    ScriptRunResultEntity,
+    ScriptContentEntity,
+  ];
 
-    if (dbConfig.type === 'sqlite') {
-        return {
-            type: 'sqlite',
-            database: resolve(appDir, dbConfig.database!),
-            entities: entities,
-            migrations: [resolve(cwd, './dist/migrations/local/*.js')],
-            synchronize: dbConfig.synchronize
-        }
-    }
-
+  if (dbConfig.type === 'sqlite') {
     return {
-        type: 'postgres',
-        host: dbConfig.host,
-        port: dbConfig.port,
-        username: dbConfig.username,
-        password: dbConfig.password,
-        database: dbConfig.database,
-        entities: entities,
-        migrations: [resolve(cwd, './dist/migrations/remote/*.js')],
-        synchronize: dbConfig.synchronize
-    }
-}
+      type: 'sqlite',
+      database: resolve(appDir, dbConfig.database!),
+      entities: entities,
+      migrations: [resolve(cwd, './dist/migrations/local/*.js')],
+      synchronize: dbConfig.synchronize,
+    };
+  }
+
+  return {
+    type: 'postgres',
+    host: dbConfig.host,
+    port: dbConfig.port,
+    username: dbConfig.username,
+    password: dbConfig.password,
+    database: dbConfig.database,
+    entities: entities,
+    migrations: [resolve(cwd, './dist/migrations/remote/*.js')],
+    synchronize: dbConfig.synchronize,
+  };
+};

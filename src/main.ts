@@ -14,10 +14,11 @@ import { DynamicIoAdapter } from './scripts/gateways/dynamic-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(
-    AppModule.register(() => configuration(resolve(process.cwd(), '.env')))
+    AppModule.register(() => configuration(resolve(process.cwd(), '.env'))),
   );
 
-  const configService: ConfigService<ConfigurationType> = app.get(ConfigService);
+  const configService: ConfigService<ConfigurationType> =
+    app.get(ConfigService);
   const type: string = configService.get('type')!;
   const port: number = configService.get('port')!;
   const origin: string = configService.get('origin')!;
@@ -25,36 +26,42 @@ async function bootstrap() {
   app.use(cookieParser());
   app.enableCors({
     credentials: true,
-    origin: origin
+    origin: origin,
   });
   app.useWebSocketAdapter(new DynamicIoAdapter(app, origin));
 
-  app.useGlobalInterceptors(new GlobalClassSerializerInterceptor(app.get(Reflector)))
-  app.useGlobalFilters(new DomainErrorFilter())
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    transformOptions: { enableImplicitConversion: true }
-  }))
+  app.useGlobalInterceptors(
+    new GlobalClassSerializerInterceptor(app.get(Reflector)),
+  );
+  app.useGlobalFilters(new DomainErrorFilter());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
   app.set('query parser', 'extended');
 
   const config = new DocumentBuilder()
-    .setTitle("LAM Api")
-    .setDescription("")
+    .setTitle('LAM Api')
+    .setDescription('')
     .setVersion('1.0')
     .addBearerAuth(
       { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
       'access-token',
     )
     .addCookieAuth(
-      "refreshToken",
+      'refreshToken',
       { type: 'http', in: 'Header', scheme: 'bearer', bearerFormat: 'JWT' },
-      "refresh-token"
+      'refresh-token',
     )
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/v1', app, documentFactory, { swaggerOptions: { persistAuthorization: true } });
+  SwaggerModule.setup('api/v1', app, documentFactory, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   await app.listen(port);
   console.log(`Running in mode ${type} on port ${port}`);

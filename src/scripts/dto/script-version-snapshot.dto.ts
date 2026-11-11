@@ -1,29 +1,29 @@
-import { ScriptContentSnapshotDto } from "./script-content-snapshot.dto";
-import { ScriptSourceSnapshotDto } from "./script-source-snapshot.dto";
-import { ScriptVersionStatusEnum } from "../enums/script-version-status.enum";
-import { Expose, Type } from "class-transformer";
+import { ScriptContentSnapshotDto } from './script-content-snapshot.dto';
+import { ScriptSourceSnapshotDto } from './script-source-snapshot.dto';
+import { ScriptVersionStatusEnum } from '../enums/script-version-status.enum';
+import { Expose, Type } from 'class-transformer';
 
 export class ScriptVersionSnapshotDto {
-    @Expose()
-    name?: string;
+  @Expose()
+  name?: string;
 
-    @Expose()
-    status!: ScriptVersionStatusEnum;
+  @Expose()
+  status!: ScriptVersionStatusEnum;
 
-    @Expose()
-    versionNumber!: number;
+  @Expose()
+  versionNumber!: number;
 
-    @Expose()
-    createdAt!: Date;
+  @Expose()
+  createdAt!: Date;
 
-    @Expose()
-    updatedAt!: Date;
+  @Expose()
+  updatedAt!: Date;
 
-    @Expose()
-    @Type(() => ScriptContentSnapshotDto)
-    content!: ScriptContentSnapshotDto;
+  @Expose()
+  @Type(() => ScriptContentSnapshotDto)
+  content!: ScriptContentSnapshotDto;
 
-    @Expose()
-    @Type(() => ScriptSourceSnapshotDto)
-    source!: ScriptSourceSnapshotDto;
+  @Expose()
+  @Type(() => ScriptSourceSnapshotDto)
+  source!: ScriptSourceSnapshotDto;
 }

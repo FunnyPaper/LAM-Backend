@@ -9,59 +9,66 @@ import { createMocks } from './utils/service/create-mocks';
 import bcryptjs from 'bcryptjs';
 
 describe(`${AuthService.name} - refresh-token`, () => {
-    describe(`::${AuthService.prototype.refresh.name} should`, () => {
-        it('check that user exists', async () => {
-            const user = await createUser();
-            user.refreshToken = await createRefreshToken({ linkRelations: true, overrides: { user } });
-            const [service] = await createMocks([]);
+  describe(`::${AuthService.prototype.refresh.name} should`, () => {
+    it('check that user exists', async () => {
+      const user = await createUser();
+      user.refreshToken = await createRefreshToken({
+        linkRelations: true,
+        overrides: { user },
+      });
+      const [service] = await createMocks([]);
 
-            await expect(service.refresh(user.id, user.refreshToken.tokenHash!))
-                .rejects
-                .toThrow(UserNotFoundError);
-        });
-
-        it('reject user without refresh token', async () => {
-            const user = await createUser();
-            const [service] = await createMocks([user]);
-
-            await expect(service.refresh(user.id, null as unknown as string))
-                .rejects
-                .toThrow(TokenRevokedError);
-        });
-
-        it('reject expired refresh token', async () => {
-            const user = await createUser();
-            user.refreshToken = await createRefreshToken({
-                linkRelations: true,
-                overrides: {
-                    user,
-                    expiresAt: faker.date.past()
-                }
-            });
-            const [service] = await createMocks([user]);
-
-            await expect(service.refresh(user.id, user.refreshToken.tokenHash!))
-                .rejects
-                .toThrow(TokenExpiredError);
-        });
-
-        it('create new access and refresh tokens', async () => {
-            const user = await createUser();
-            user.refreshToken = await createRefreshToken({ linkRelations: true, overrides: { user } });
-            const [service] = await createMocks([user]);
-
-            const compareSpy = jest.spyOn(bcryptjs, 'compare')
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                .mockImplementation(() => Promise.resolve(true))
-
-            await expect(service.refresh(user.id, user.refreshToken.tokenHash!))
-                .resolves
-                .toMatchObject({
-                    accessToken: expect.any(String),
-                    refreshToken: expect.any(String)
-                });
-
-            compareSpy.mockRestore();
-        });
+      await expect(
+        service.refresh(user.id, user.refreshToken.tokenHash!),
+      ).rejects.toThrow(UserNotFoundError);
     });
+
+    it('reject user without refresh token', async () => {
+      const user = await createUser();
+      const [service] = await createMocks([user]);
+
+      await expect(
+        service.refresh(user.id, null as unknown as string),
+      ).rejects.toThrow(TokenRevokedError);
+    });
+
+    it('reject expired refresh token', async () => {
+      const user = await createUser();
+      user.refreshToken = await createRefreshToken({
+        linkRelations: true,
+        overrides: {
+          user,
+          expiresAt: faker.date.past(),
+        },
+      });
+      const [service] = await createMocks([user]);
+
+      await expect(
+        service.refresh(user.id, user.refreshToken.tokenHash!),
+      ).rejects.toThrow(TokenExpiredError);
+    });
+
+    it('create new access and refresh tokens', async () => {
+      const user = await createUser();
+      user.refreshToken = await createRefreshToken({
+        linkRelations: true,
+        overrides: { user },
+      });
+      const [service] = await createMocks([user]);
+
+      const compareSpy = jest
+        .spyOn(bcryptjs, 'compare')
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        .mockImplementation(() => Promise.resolve(true));
+
+      await expect(
+        service.refresh(user.id, user.refreshToken.tokenHash!),
+      ).resolves.toMatchObject({
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
+      });
+
+      compareSpy.mockRestore();
+    });
+  });
 });
